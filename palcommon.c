@@ -277,7 +277,8 @@ PAL_RLEBlitWithColorShift(
    UINT          uiWidth     = 0;
    UINT          uiHeight    = 0;
    UINT          uiSrcX      = 0;
-   BYTE          T, b;
+   BYTE          T;
+   BYTE          shifttable[256];
    INT           dx          = PAL_X(pos);
    INT           dy          = PAL_Y(pos);
    LPBYTE        p;
@@ -323,6 +324,7 @@ PAL_RLEBlitWithColorShift(
    //
    // Start decoding and blitting the bitmap.
    //
+   PAL_MakeColorShiftTable(shifttable, (SHORT)iColorShift);
    lpBitmapRLE += 4;
    for (i = 0; i < uiLen;)
    {
@@ -395,21 +397,7 @@ PAL_RLEBlitWithColorShift(
             p = ((LPBYTE)lpDstSurface->pixels) + y * lpDstSurface->pitch;
             for (; k != 0; k--)
             {
-               b = (lpBitmapRLE[j] & 0x0F);
-               if ((INT)b + iColorShift > 0x0F)
-               {
-                  b = 0x0F;
-               }
-               else if ((INT)b + iColorShift < 0)
-               {
-                  b = 0;
-               }
-               else
-               {
-                  b += iColorShift;
-               }
-
-               p[x] = (b | (lpBitmapRLE[j] & 0xF0));
+               p[x] = shifttable[lpBitmapRLE[j]];
                j++;
                x++;
             }
@@ -1134,4 +1122,47 @@ PAL_MKFDecompressChunk(
    free(buf);
 
    return len;
+}
+
+
+VOID
+PAL_MakeColorShiftTable(
+   LPBYTE            lpTable,
+   SHORT             iColorShift
+)
+/*++
+  Purpose:
+
+    Make a color shift table, to speed up futher color shift operations.
+
+  Parameters:
+
+    [OUT] lpTable - pointer to the table, an array of exactly 256 bytes.
+
+    [IN]  iColorShift - shift the color by this value.
+
+  Return value:
+
+    None.
+
+--*/
+{
+   UINT   i;
+   BYTE   b;
+   for (i = 0; i < 256; i++) {
+      b = ((BYTE)i & 0x0F);
+
+      b += iColorShift;
+
+      if (b & 0x80)
+      {
+         b = 0;
+      }
+      else if (b & 0x70)
+      {
+         b = 0x0F;
+      }
+
+      lpTable[i] = (b | ((BYTE)i & 0xF0));
+   }
 }

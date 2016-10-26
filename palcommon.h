@@ -247,6 +247,12 @@ PAL_MKFDecompressChunk(
    FILE           *fp
 );
 
+VOID
+PAL_MakeColorShiftTable(
+   LPBYTE            lpTable,
+   SHORT             iColorShift
+);
+
 // From yj1.c:
 extern INT
 (*Decompress)(
