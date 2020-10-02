@@ -866,33 +866,6 @@ void adlib_write(opl_chip* chip, Bitu idx, Bit8u val) {
 	}
 }
 
-
-Bitu adlib_reg_read(opl_chip* chip, Bitu port) {
-#if defined(OPLTYPE_IS_OPL3)
-	// opl3-detection routines require ret&6 to be zero
-	if ((port&1)==0) {
-		return chip->status;
-	}
-	return 0x00;
-#else
-	// opl2-detection routines require ret&6 to be 6
-	if ((port&1)==0) {
-		return chip->status|6;
-	}
-	return 0xff;
-#endif
-}
-
-void adlib_write_index(opl_chip* chip, Bitu port, Bit8u val) {
-	chip->opl_index = val;
-#if defined(OPLTYPE_IS_OPL3)
-	if ((port&3)!=0) {
-		// possibly second set
-		if (((chip->adlibreg[0x105]&1)!=0) || (chip->opl_index==5)) chip->opl_index |= ARC_SECONDSET;
-	}
-#endif
-}
-
 static void OPL_INLINE clipit16(Bit32s ival, Bit16s* outval) {
 	if (ival<32768) {
 		if (ival>-32769) {

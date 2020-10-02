@@ -29,18 +29,7 @@ GLOBALVARS * const  gpGlobals = &_gGlobals;
 
 CONFIGURATION gConfig;
 
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 #define DO_BYTESWAP(buf, size)
-#else
-#define DO_BYTESWAP(buf, size)                                   \
-   do {                                                          \
-      int i;                                                     \
-      for (i = 0; i < (size) / 2; i++)                           \
-      {                                                          \
-         ((LPWORD)(buf))[i] = SDL_SwapLE16(((LPWORD)(buf))[i]);  \
-      }                                                          \
-   } while(0)
-#endif
 
 #define LOAD_DATA(buf, size, chunknum, fp)                       \
    do {                                                          \
@@ -590,13 +579,6 @@ PAL_LoadGame_Common(
 	DO_BYTESWAP(s, size);
 
 	//
-	// Cash amount is in DWORD, so do a wordswap in Big-Endian.
-	//
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	s->dwCash = ((s->dwCash >> 16) | (s->dwCash << 16));
-#endif
-
-	//
 	// Get common data from the saved game struct.
 	//
 	gpGlobals->viewport = PAL_XY(s->wViewportX, s->wViewportY);
@@ -777,13 +759,6 @@ PAL_SaveGame_Common(
 	// Adjust endianness
 	//
 	DO_BYTESWAP(s, size);
-
-	//
-	// Cash amount is in DWORD, so do a wordswap in Big-Endian.
-	//
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-	s->dwCash = ((s->dwCash >> 16) | (s->dwCash << 16));
-#endif
 
 	//
 	// Try writing to file

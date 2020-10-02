@@ -28,21 +28,6 @@
 
 PAL_C_LINKAGE_BEGIN
 
-void
-UTIL_MsgBox(
-   char *string
-);
-
-long
-flength(
-   FILE *fp
-);
-
-void
-trim(
-   char *str
-);
-
 char *
 UTIL_GlobalBuffer(
 	int         index
@@ -202,12 +187,6 @@ UTIL_GetFullPathName(
 	const char *subpath
 );
 
-PALFILE
-UTIL_CheckResourceFiles(
-	const char *path,
-	const char *msgfile
-);
-
 /*
  * Platform-specific utilities
  */
@@ -290,25 +269,6 @@ UTIL_LogAddOutputCallback(
 /*++
   Purpose:
 
-    Removes a log output callback.
-
-  Parameters:
-
-    [IN]  id           - The id of callback function to be removed.
-
-  Return value:
-
-    None
-
---*/
-void
-UTIL_LogRemoveOutputCallback(
-	int            id
-);
-
-/*++
-  Purpose:
-
     Set the minimal log level that could be output.
 	Any level below this level will produce no output.
 
@@ -329,37 +289,11 @@ UTIL_LogOutput(
 	...
 );
 
-/*++
-  Purpose:
-
-    Set the minimal log level that could be output.
-	Any level below this level will produce no output.
-
-  Parameters:
-
-    [IN]  minlevel - The minimal log level, must be within the
-	                 range [LOGLEVEL_MIN, LOGLEVEL_MAX].
-
-  Return value:
-
-    None.
-
---*/
-void
-UTIL_LogSetLevel(
-	LOGLEVEL       minlevel
-);
-
 void
 UTIL_LogToFile(
 	LOGLEVEL       _,
 	const char    *string,
 	const char    *__
-);
-
-void
-UTIL_LogSetPrelude(
-    const char    *prelude
 );
 
 PAL_C_LINKAGE_END

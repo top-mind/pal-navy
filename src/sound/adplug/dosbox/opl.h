@@ -208,7 +208,4 @@ void change_feedback(opl_chip* chip, Bitu chanbase, op_type* op_pt);
 void adlib_init(opl_chip* chip, Bit32u samplerate);
 void adlib_write(opl_chip* chip, Bitu idx, Bit8u val);
 void adlib_getsample(opl_chip* chip, Bit16s* sndptr, Bits numsamples);
-
-Bitu adlib_reg_read(opl_chip* chip, Bitu port);
-void adlib_write_index(opl_chip* chip, Bitu port, Bit8u val);
 #endif

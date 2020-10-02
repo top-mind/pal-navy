@@ -33,72 +33,6 @@
 static char internal_buffer[PAL_MAX_GLOBAL_BUFFERS + 1][PAL_GLOBAL_BUFFER_SIZE];
 #define INTERNAL_BUFFER_SIZE_ARGS internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE
 
-void UTIL_MsgBox(char *string)
-{
-    extern SDL_Window *gpWindow;
-    char buffer[300];
-    SDL_MessageBoxButtonData buttons[] = { { 0, 0, "OK" } };
-    SDL_MessageBoxData mbd = { SDL_MESSAGEBOX_WARNING, gpWindow, "Alert",buffer, 1, buttons, NULL };
-    int btnid;
-    sprintf(buffer, "%s\n", string);
-    SDL_ShowMessageBox(&mbd, &btnid);
-}
-
-long
-flength(
-   FILE *fp
-)
-{
-   long old_pos = ftell(fp), length;
-   if (old_pos == -1) return -1;
-   if (fseek(fp, 0, SEEK_END) == -1) return -1;
-   length = ftell(fp); fseek(fp, old_pos, SEEK_SET);
-   return length;
-}
-
-void
-trim(
-   char *str
-)
-/*++
-  Purpose:
-
-    Remove the leading and trailing spaces in a string.
-
-  Parameters:
-
-    str - the string to proceed.
-
-  Return value:
-
-    None.
-
---*/
-{
-   int pos = 0;
-   char *dest = str;
-
-   //
-   // skip leading blanks
-   //
-   while (str[pos] <= ' ' && str[pos] > 0)
-      pos++;
-
-   while (str[pos])
-   {
-      *(dest++) = str[pos];
-      pos++;
-   }
-
-   *(dest--) = '\0'; // store the null
-
-   //
-   // remove trailing blanks
-   //
-   while (dest >= str && *dest <= ' ' && *dest > 0)
-      *(dest--) = '\0';
-}
-
 char *
 UTIL_va(
 	char       *buffer,
@@ -585,7 +519,6 @@ UTIL_GetFullPathName(
 		result = internal_buffer[PAL_MAX_GLOBAL_BUFFERS];
 	}
 
-#if !defined(PAL_FILESYSTEM_IGNORE_CASE) || !PAL_FILESYSTEM_IGNORE_CASE
 	if (result == NULL)
 	{
 		size_t pos = strspn(_sub, PAL_PATH_SEPARATORS);
@@ -616,7 +549,6 @@ UTIL_GetFullPathName(
 			free(list);
 		}
 	}
-#endif
 	if (result != NULL)
 	{
 		size_t dstlen = min(buflen - 1, strlen(result));
@@ -700,71 +632,11 @@ UTIL_GlobalBuffer(
 }
 
 
-PALFILE
-UTIL_CheckResourceFiles(
-	const char *path,
-	const char *msgfile
-)
-{
-	const char *common_files[] = {
-		"abc.mkf", "ball.mkf", "data.mkf", "f.mkf",
-		"fbp.mkf", "fire.mkf", "gop.mkf",  "map.mkf",
-		"mgo.mkf", "pat.mkf",  "rgm.mkf",  "rng.mkf",
-		"sss.mkf"
-	};
-	const char *msg_files[][2] = {
-		{ msgfile, "m.msg"    },
-		{ msgfile, "word.dat" }
-	};
-	const char *sound_files[2] = { "voc.mkf", "sounds.mkf" };
-	const char *music_files[2] = { "midi.mkf", "mus.mkf" };
-	int msgidx = !(msgfile && *msgfile);
-	PALFILE retval = (PALFILE)0;
-
-	for (int i = 0; i < sizeof(common_files) / sizeof(common_files[0]); i++)
-	{
-		if (!UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, path, common_files[i]))
-		{
-			retval |= (PALFILE)(1 << i);
-		}
-	}
-
-	for (int i = 0; i < sizeof(msg_files[0]) / sizeof(msg_files[0][0]); i++)
-	{
-		if (!UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, path, msg_files[i][msgidx]))
-		{
-			retval |= (PALFILE)(1 << ((i + 1) * msgidx + 13));
-		}
-	}
-
-	for (int i = 0; i < sizeof(sound_files) / sizeof(sound_files[0]); i++)
-	{
-		if (!UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, path, sound_files[i]))
-		{
-			retval |= (PALFILE)(1 << (i + 16));
-		}
-	}
-
-	for (int i = 0; i < sizeof(music_files) / sizeof(music_files[0]); i++)
-	{
-		if (!UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, path, music_files[i]))
-		{
-			retval |= (PALFILE)(1 << (i + 18));
-		}
-	}
-
-	return retval;
-}
-
-
 /*
 * Logging utilities
 */
 
-#ifndef PAL_LOG_BUFFER_SIZE
-# define PAL_LOG_BUFFER_SIZE      4096
-#endif
-
+#define PAL_LOG_BUFFER_SIZE      4096
 #define PAL_LOG_BUFFER_EXTRA_SIZE 32+sizeof(_log_prelude)
 
 static char _log_prelude[80];
@@ -804,23 +676,6 @@ UTIL_LogAddOutputCallback(
 	}
 
 	return -1;
-}
-
-void
-UTIL_LogRemoveOutputCallback(
-	int            id
-)
-{
-	if (id < 0 || id >= PAL_LOG_MAX_OUTPUTS) return;
-
-	while (id < PAL_LOG_MAX_OUTPUTS - 1)
-	{
-		_log_callbacks[id] = _log_callbacks[id + 1];
-		_log_callback_levels[id] = _log_callback_levels[id + 1];
-		id++;
-	}
-	_log_callbacks[id] = NULL;
-	_log_callback_levels[id] = LOGLEVEL_MIN;
 }
 
 void
@@ -867,19 +722,6 @@ UTIL_LogOutput(
 }
 
 void
-UTIL_LogSetLevel(
-	LOGLEVEL       minlevel
-)
-{
-	if (minlevel < LOGLEVEL_MIN)
-		gConfig.iLogLevel = LOGLEVEL_MIN;
-	else if (minlevel > LOGLEVEL_MAX)
-		gConfig.iLogLevel = LOGLEVEL_MAX;
-	else
-		gConfig.iLogLevel = minlevel;
-}
-
-void
 UTIL_LogToFile(
 	LOGLEVEL       _,
 	const char    *string,
@@ -893,32 +735,3 @@ UTIL_LogToFile(
 		fclose(fp);
 	}
 }
-
-void
-UTIL_LogSetPrelude(
-                   const char    *prelude
-)
-{
-    memset(_log_prelude, 0, sizeof(_log_prelude));
-    if( prelude )
-        strncpy(_log_prelude, prelude, sizeof(_log_prelude) - 1);
-}
-
-#if PAL_NEED_STRCASESTR
-PAL_FORCE_INLINE char* stoupper(const char* s)
-{
-	char* p = strdup(s);
-	char* p1 = p;
-	while (*p = toupper(*p)) p++;
-	return p1;
-}
-PAL_C_LINKAGE char* strcasestr(const char *a, const char *b) {
-	char *a1 = stoupper(a);
-	char *b1 = stoupper(b);
-	char *ptr = strstr(a1, b1);
-	if (ptr != NULL) ptr = (char*)a + (ptr - a1);
-	free(a1);
-	free(b1);
-	return ptr;
-}
-#endif

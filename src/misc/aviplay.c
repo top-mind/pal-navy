@@ -61,21 +61,8 @@
 #include "riff.h"
 #include "palcfg.h"
 
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-
-# define SwapStruct32(v, s) \
-	for(int s##_i = 0; s##_i < sizeof(s) / sizeof(uint32_t); s##_i++) \
-		((uint32_t *)&v)[s##_i] = SDL_Swap32(((uint32_t *)&v)[s##_i])
-
-# define SwapStructFields(v, f1, f2) v.f1 ^= v.f2, v.f2 ^= v.f1, v.f1 ^= v.f2
-
-
-#else
-
 # define SwapStruct32(...)
 # define SwapStructFields(...)
-
-#endif
 
 #define HAS_FLAG(v, f) (((v) & (f)) == (f))
 

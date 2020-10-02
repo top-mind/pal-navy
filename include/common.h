@@ -27,7 +27,6 @@
 # define PAL_CLASSIC        1
 #endif
 
-
 #include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,9 +44,6 @@
 #define __WIDETEXT(quote) L##quote
 #define WIDETEXT(quote) __WIDETEXT(quote)
 
-#define STR_INDIR(x)                    #x
-#define STR(x)                          STR_INDIR(x)
-
 #if !defined(fmax) || !defined(fmin)
 # include <math.h>
 #endif
@@ -62,27 +58,9 @@
 # define min fmin
 #endif
 
-// For SDL 1.2 compatibility
-#ifndef SDL_TICKS_PASSED
 #define SDL_TICKS_PASSED(A, B)  ((Sint32)((B) - (A)) <= 0)
-#endif
 
-
-#ifndef SDL_AUDIO_BITSIZE
-# define SDL_AUDIO_BITSIZE(x)         (x & 0xFF)
-#endif
-
-/* This is need when compiled with SDL 1.2 */
-#ifndef SDL_FORCE_INLINE
-#if   ( (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__) )
-#define SDL_FORCE_INLINE __attribute__((always_inline)) static __inline__
-#else
-#define SDL_FORCE_INLINE static SDL_INLINE
-#endif
-#endif /* SDL_FORCE_INLINE not defined */
-
-# define PAL_FORCE_INLINE SDL_FORCE_INLINE
-
+#define PAL_FORCE_INLINE __attribute__((always_inline)) static __inline__
 
 # include <unistd.h>
 # include <dirent.h>
@@ -131,16 +109,22 @@ typedef const WCHAR        *LPCWSTR;
 # define PAL_C_LINKAGE_END
 #endif
 
-/* When porting SDLPAL to a new platform, please make a separate directory and put a file 
-   named 'pal_config.h' that contains marco definitions & header includes into the directory.
-   The example of this file can be found in directories of existing portings.
- */
-#include "pal_config.h"
+#define PAL_PREFIX            "./data"
+#define PAL_SAVE_PREFIX       "./data"
 
+#define PAL_DEFAULT_WINDOW_WIDTH   640
+#define PAL_DEFAULT_WINDOW_HEIGHT  400
+#define PAL_DEFAULT_FULLSCREEN_HEIGHT 480
 
-#ifndef PAL_DEFAULT_FULLSCREEN_HEIGHT
-# define PAL_DEFAULT_FULLSCREEN_HEIGHT PAL_DEFAULT_WINDOW_HEIGHT
-#endif
+#define PAL_VIDEO_INIT_FLAGS  (SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | (gConfig.fFullScreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0))
+
+#define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
+
+#define PAL_PLATFORM         NULL
+#define PAL_CREDIT           NULL
+#define PAL_PORTYEAR         NULL
+
+#include <sys/time.h>
 
 #ifndef PAL_DEFAULT_TEXTURE_WIDTH
 # define PAL_DEFAULT_TEXTURE_WIDTH     PAL_DEFAULT_WINDOW_WIDTH
@@ -151,16 +135,9 @@ typedef const WCHAR        *LPCWSTR;
 #endif
 
 /* Default for 1024 samples */
-#ifndef PAL_AUDIO_DEFAULT_BUFFER_SIZE
-# define PAL_AUDIO_DEFAULT_BUFFER_SIZE   1024
-#endif
+#define PAL_AUDIO_DEFAULT_BUFFER_SIZE   1024
 
-
-
-#ifndef PAL_CONFIG_PREFIX
-# define PAL_CONFIG_PREFIX PAL_PREFIX
-#endif
-
+#define PAL_CONFIG_PREFIX PAL_PREFIX
 
 #ifndef PAL_LARGE
 # define PAL_LARGE
@@ -168,22 +145,6 @@ typedef const WCHAR        *LPCWSTR;
 
 #ifndef PAL_SCALE_SCREEN
 # define PAL_SCALE_SCREEN   TRUE
-#endif
-
-#ifndef PAL_IS_VALID_JOYSTICK
-# define PAL_IS_VALID_JOYSTICK(s)  TRUE
-#endif
-
-#ifndef PAL_FATAL_OUTPUT
-# define PAL_FATAL_OUTPUT(s)
-#endif
-
-#ifndef PAL_CONVERT_UTF8
-# define PAL_CONVERT_UTF8(s) s
-#endif
-
-#ifndef PAL_NATIVE_PATH_SEPARATOR
-# define PAL_NATIVE_PATH_SEPARATOR "/"
 #endif
 
 #define PAL_fread(buf, elem, num, fp) if (fread((buf), (elem), (num), (fp)) < (num)) return -1

@@ -78,11 +78,6 @@ PAL_GetPalette(
       palette[i].r = buf[(fNight ? 256 * 3 : 0) + i * 3] << 2;
       palette[i].g = buf[(fNight ? 256 * 3 : 0) + i * 3 + 1] << 2;
       palette[i].b = buf[(fNight ? 256 * 3 : 0) + i * 3 + 2] << 2;
-#if 0
-      palette[i].r += (255 - palette[i].r) / 5;
-      palette[i].g += (255 - palette[i].g) / 5;
-      palette[i].b += (255 - palette[i].b) / 5;
-#endif
    }
 
    return palette;

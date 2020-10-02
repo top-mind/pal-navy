@@ -63,6 +63,8 @@ LPWSTR g_rcCredits[12];
 
 TEXTLIB         g_TextLib;
 
+static CODEPAGE g_codepage = CP_UTF_8;
+
 PAL_FORCE_INLINE int
 PAL_ParseLine(
 	char     *line,
@@ -645,6 +647,38 @@ PAL_ReadMessageFile(
 
 	return (msg_cnt > 0 && word_cnt > 0) ? 1 : 0;
 }
+
+static inline INT
+PAL_MultiByteToWideChar(
+   LPCSTR        mbs,
+   int           mbslength,
+   LPWSTR        wcs,
+   int           wcslength
+)
+/*++
+  Purpose:
+
+    Convert multi-byte string into the corresponding unicode string.
+
+  Parameters:
+
+    [IN]  mbs - Pointer to the multi-byte string.
+	[IN]  mbslength - Length of the multi-byte string, or -1 for auto-detect.
+	[IN]  wcs - Pointer to the wide string buffer.
+	[IN]  wcslength - Length of the wide string buffer.
+
+  Return value:
+
+    The length of converted wide string. If mbslength is set to -1, the returned
+	value includes the terminal null-char; otherwise, the null-char is not included.
+	If wcslength is set to 0, wcs can be set to NULL and the return value is the
+	required length of the wide string buffer.
+
+--*/
+{
+	return PAL_MultiByteToWideCharCP(g_codepage, mbs, mbslength, wcs, wcslength);
+}
+
 
 INT
 PAL_InitText(
@@ -1801,28 +1835,6 @@ PAL_EndDialog(
 }
 
 BOOL
-PAL_IsInDialog(
-   VOID
-)
-/*++
-  Purpose:
-
-    Check if there are dialog texts on the screen.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    TRUE if there are dialog texts on the screen, FALSE if not.
-
---*/
-{
-   return (g_TextLib.nCurrentDialogLine != 0);
-}
-
-BOOL
 PAL_DialogIsPlayingRNG(
    VOID
 )
@@ -1843,24 +1855,6 @@ PAL_DialogIsPlayingRNG(
 {
    return g_TextLib.fPlayingRNG;
 }
-
-WCHAR
-PAL_GetInvalidChar(
-	CODEPAGE      uCodePage
-)
-{
-	switch (uCodePage)
-	{
-	case CP_BIG5:     return 0x3f;
-	case CP_GBK:      return 0x3f;
-		//case CP_SHIFTJIS: return 0x30fb;
-	case CP_UTF_8:    return 0x3f;
-	case CP_UCS:      return 0x3f;
-	default:          return 0;
-	}
-}
-
-static CODEPAGE g_codepage = CP_UTF_8;
 
 CODEPAGE
 PAL_GetCodePage(
@@ -2210,37 +2204,6 @@ PAL_MultiByteToWideCharCP(
 		}
 		return wlen;
 	}
-}
-
-INT
-PAL_MultiByteToWideChar(
-   LPCSTR        mbs,
-   int           mbslength,
-   LPWSTR        wcs,
-   int           wcslength
-)
-/*++
-  Purpose:
-
-    Convert multi-byte string into the corresponding unicode string.
-
-  Parameters:
-
-    [IN]  mbs - Pointer to the multi-byte string.
-	[IN]  mbslength - Length of the multi-byte string, or -1 for auto-detect.
-	[IN]  wcs - Pointer to the wide string buffer.
-	[IN]  wcslength - Length of the wide string buffer.
-
-  Return value:
-
-    The length of converted wide string. If mbslength is set to -1, the returned
-	value includes the terminal null-char; otherwise, the null-char is not included.
-	If wcslength is set to 0, wcs can be set to NULL and the return value is the
-	required length of the wide string buffer.
-
---*/
-{
-	return PAL_MultiByteToWideCharCP(g_codepage, mbs, mbslength, wcs, wcslength);
 }
 
 INT

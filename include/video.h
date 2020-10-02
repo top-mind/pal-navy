@@ -139,14 +139,6 @@ VIDEO_RenderCopy(
     VOID
 );
 
-VOID
-VIDEO_SetupTouchArea(
-    int window_w,
-    int window_h,
-    int draw_w,
-    int draw_h
-);
-
 PAL_C_LINKAGE_END
 
 #endif

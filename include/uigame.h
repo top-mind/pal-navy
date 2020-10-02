@@ -43,11 +43,6 @@ PAL_SaveSlotMenu(
    WORD        wDefaultSlot
 );
 
-WORD
-PAL_TripleMenu(
-   WORD  wThirdWord
-);
-
 BOOL
 PAL_ConfirmMenu(
    VOID

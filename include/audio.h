@@ -48,16 +48,6 @@ AUDIO_GetDeviceSpec(
 );
 
 VOID
-AUDIO_IncreaseVolume(
-   VOID
-);
-
-VOID
-AUDIO_DecreaseVolume(
-   VOID
-);
-
-VOID
 AUDIO_PlayMusic(
    INT       iNumRIX,
    BOOL      fLoop,

@@ -25,16 +25,9 @@
 
 volatile PALINPUTSTATE   g_InputState;
 
-
-BOOL                     g_fUseJoystick = TRUE;
-
-static void _default_init_filter() {}
 static int _default_input_event_filter(const SDL_Event *event, volatile PALINPUTSTATE *state) { return 0; }
-static void _default_input_shutdown_filter() {}
 
-static void (*input_init_filter)() = _default_init_filter;
 static int (*input_event_filter)(const SDL_Event *, volatile PALINPUTSTATE *) = _default_input_event_filter;
-static void (*input_shutdown_filter)() = _default_input_shutdown_filter;
 
 static const int g_KeyMap[][2] = {
    { SDLK_UP,        kKeyUp },
@@ -464,12 +457,6 @@ PAL_InitInput(
    memset((void *)&g_InputState, 0, sizeof(g_InputState));
    g_InputState.dir = kDirUnknown;
    g_InputState.prevdir = kDirUnknown;
-
-   //
-   // Check for joystick
-   //
-
-   input_init_filter();
 }
 
 VOID
@@ -491,7 +478,6 @@ PAL_ShutdownInput(
 
 --*/
 {
-   input_shutdown_filter();
 }
 
 static int
@@ -551,39 +537,4 @@ PAL_ProcessEvent(
    while (PAL_PollEvent(NULL));
 
    PAL_UpdateKeyboardState();
-}
-
-VOID
-PAL_RegisterInputFilter(
-   void (*init_filter)(),
-   int (*event_filter)(const SDL_Event *, volatile PALINPUTSTATE *),
-   void (*shutdown_filter)()
-)
-/*++
-  Purpose:
-
-    Register caller-defined input event filter.
-
-  Parameters:
-
-    [IN] init_filter - Filter that will be called inside PAL_InitInput
-	[IN] event_filter - Filter that will be called inside PAL_PollEvent, 
-	                    return non-zero value from this filter disables
-						further internal event processing.
-	[IN] shutdown_filter - Filter that will be called inside PAL_ShutdownInput
-
-	Passing NULL to either parameter means the caller does not provide such filter.
-
-  Return value:
-
-    None.
-
---*/
-{
-	if (init_filter)
-		input_init_filter = init_filter;
-	if (event_filter)
-		input_event_filter = event_filter;
-	if (shutdown_filter)
-		input_shutdown_filter = shutdown_filter;
 }

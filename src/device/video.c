@@ -57,7 +57,7 @@ static WORD               g_wShakeTime       = 0;
 static WORD               g_wShakeLevel      = 0;
 
 
-void VIDEO_SetupTouchArea(int window_w, int window_h, int draw_w, int draw_h)
+static inline void VIDEO_SetupTouchArea(int window_w, int window_h, int draw_w, int draw_h)
 {
 	gOverlayRect.x = (window_w - draw_w) / 2;
 	gOverlayRect.y = (window_h - draw_h) / 2;
@@ -135,11 +135,7 @@ VIDEO_Startup(
 
 --*/
 {
-	extern SDL_Surface* STBIMG_Load(const char* file);
 	extern char *dirname(char *path);
-#if APPIMAGE
-	SDL_Surface *surf = STBIMG_Load( PAL_va(0, "%s%s", dirname(dirname(dirname(gExecutablePath))), "/usr/share/icons/hicolor/256x256/apps/sdlpal.png" ) );
-#endif
 
    int render_w, render_h;
 
@@ -162,12 +158,6 @@ VIDEO_Startup(
    {
       return -1;
    }
-
-# if APPIMAGE
-	if(surf){
-		SDL_SetWindowIcon(gpWindow, surf);
-	}
-# endif
 
    gpRenderer = SDL_CreateRenderer(gpWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
@@ -232,11 +222,6 @@ VIDEO_Startup(
          SDL_FreeSurface(overlay);
       }
    }
-
-#if APPIMAGE
-	if(surf)
-		SDL_FreeSurface(surf);
-#endif
 
    return 0;
 }
@@ -435,11 +420,6 @@ VIDEO_UpdateScreen(
 
       SDL_FillRect(gpScreenReal, &dstrect, 0);
 
-#if SDL_MAJOR_VERSION == 1 && SDL_MINOR_VERSION <= 2
-      dstrect.x = dstrect.y = 0;
-      dstrect.w = gpScreenReal->w;
-      dstrect.h = gpScreenReal->h;
-#endif
       g_wShakeTime--;
    }
    else
@@ -450,12 +430,6 @@ VIDEO_UpdateScreen(
       dstrect.h = screenRealHeight;
 
       SDL_SoftStretch(gpScreen, NULL, gpScreenReal, &dstrect);
-
-#if SDL_MAJOR_VERSION == 1 && SDL_MINOR_VERSION <= 2
-      dstrect.x = dstrect.y = 0;
-      dstrect.w = gpScreenReal->w;
-      dstrect.h = gpScreenReal->h;
-#endif
    }
 
    gRenderBackend.RenderCopy();
@@ -573,30 +547,6 @@ VIDEO_GetPalette(
 --*/
 {
    return gpPalette->colors;
-}
-
-VOID
-VIDEO_ToggleScaleScreen(
-   VOID
-)
-/*++
-  Purpose:
-
-    Toggle scalescreen mode, only used in some platforms.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-   bScaleScreen = !bScaleScreen;
-   VIDEO_Resize(PAL_DEFAULT_WINDOW_WIDTH, PAL_DEFAULT_WINDOW_HEIGHT);
-   VIDEO_UpdateScreen(NULL);
 }
 
 VOID
@@ -953,7 +903,7 @@ VIDEO_SetWindowTitle(
 
 --*/
 {
-	SDL_SetWindowTitle(gpWindow, PAL_CONVERT_UTF8(pszTitle));
+	SDL_SetWindowTitle(gpWindow, pszTitle);
 }
 
 SDL_Surface *

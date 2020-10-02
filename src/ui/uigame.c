@@ -317,29 +317,6 @@ PAL_SelectionMenu(
 	return wReturnValue;
 }
 
-WORD
-PAL_TripleMenu(
-   WORD  wThirdWord
-)
-/*++
-  Purpose:
-
-    Show a triple-selection box.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    User-selected index.
-
---*/
-{
-   WORD wItems[3] = { CONFIRMMENU_LABEL_NO, CONFIRMMENU_LABEL_YES, wThirdWord };
-   return PAL_SelectionMenu(3, 0, wItems);
-}
-
 BOOL
 PAL_ConfirmMenu(
    VOID

@@ -84,13 +84,6 @@ PAL_SetTouchBounds(
    SDL_Rect renderRect
 );
 
-VOID
-PAL_RegisterInputFilter(
-   void (*init_filter)(),
-   int (*event_filter)(const SDL_Event *, volatile PALINPUTSTATE *),
-   void (*shutdown_filter)()
-);
-
 extern volatile PALINPUTSTATE g_InputState;
 
 extern BOOL g_fUseJoystick;

@@ -9,8 +9,6 @@ void resampler_init(void);
 
 void * resampler_create(void);
 void resampler_delete(void *);
-void * resampler_dup(const void *);
-void resampler_dup_inplace(void *, const void *);
 
 enum
 {
@@ -27,9 +25,7 @@ void resampler_set_quality(void *, int quality);
 
 int resampler_get_free_count(void *);
 void resampler_write_sample(void *, short sample);
-void resampler_write_sample_fixed(void *, int sample, unsigned char depth);
 void resampler_set_rate( void *, double new_factor );
-int resampler_ready(void *);
 void resampler_clear(void *);
 int resampler_get_sample_count(void *);
 int resampler_get_sample(void *);

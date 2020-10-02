@@ -180,21 +180,8 @@ PAL_EndDialog(
 );
 
 BOOL
-PAL_IsInDialog(
-   VOID
-);
-
-BOOL
 PAL_DialogIsPlayingRNG(
    VOID
-);
-
-INT
-PAL_MultiByteToWideChar(
-   LPCSTR        mbs,
-   int           mbslength,
-   LPWSTR        wcs,
-   int           wcslength
 );
 
 INT
@@ -205,11 +192,6 @@ PAL_MultiByteToWideCharCP(
 	LPWSTR        wcs,
 	int           wcslength
 	);
-
-WCHAR
-PAL_GetInvalidChar(
-   CODEPAGE      uCodePage
-);
 
 CODEPAGE
 PAL_GetCodePage(

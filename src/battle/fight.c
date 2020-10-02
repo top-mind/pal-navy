@@ -249,7 +249,7 @@ PAL_CalcMagicDamage(
    return sDamage;
 }
 
-SHORT
+static inline SHORT
 PAL_CalcPhysicalAttackDamage(
    WORD           wAttackStrength,
    WORD           wDefense,
