@@ -32,9 +32,7 @@
 #include <math.h>
 
 /* WASAPI need fewer samples for less gapping */
-#ifndef PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI
-# define PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI   512
-#endif
+#define PAL_AUDIO_FORCE_BUFFER_SIZE_WASAPI   512
 
 typedef void(*ResampleMixFunction)(void *, const void *, int, void *, int, int, uint8_t);
 

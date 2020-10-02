@@ -51,8 +51,6 @@
 # define PAL_CREDIT           NULL
 # define PAL_PORTYEAR         NULL
 
-# define PAL_HAS_CONFIG_PAGE  1
-
 #include <sys/time.h>
 
 #endif

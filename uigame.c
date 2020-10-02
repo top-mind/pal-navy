@@ -2016,11 +2016,7 @@ PAL_QuitGame(
    VOID
 )
 {
-#if PAL_HAS_CONFIG_PAGE
-	WORD wReturnValue = PAL_TripleMenu(SYSMENU_LABEL_LAUNCHSETTING);
-#else
 	WORD wReturnValue = PAL_ConfirmMenu(); // No config menu available
-#endif
 	if (wReturnValue == 1 || wReturnValue == 2)
 	{
 		if (wReturnValue == 2) gConfig.fLaunchSetting = TRUE;

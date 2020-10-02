@@ -454,9 +454,6 @@ main(
    memset(gExecutablePath,0,PAL_MAX_PATH);
    strncpy(gExecutablePath, argv[0], PAL_MAX_PATH);
 
-#if PAL_HAS_PLATFORM_STARTUP
-   UTIL_Platform_Startup(argc,argv);
-#endif
 
    if (setjmp(g_exit_jmp_buf) != 0)
    {
@@ -481,17 +478,6 @@ main(
    //
    if (UTIL_Platform_Init(argc, argv) != 0)
 	   return -1;
-
-   //
-   // Should launch setting?
-   // Generally, the condition should never be TRUE as the UTIL_Platform_Init is assumed
-   // to handle gConfig.fLaunchSetting correctly. However, it may actually be true due to
-   // the activatation event on WinRT platform, so close the current process to make new
-   // process go to setting.
-   // For platforms without configuration page available, this condition will NEVER be true.
-   //
-   if (PAL_HAS_CONFIG_PAGE && gConfig.fLaunchSetting)
-	   return 0;
 
    //
    // If user requests a file-based log, then add it after the system-specific one.
