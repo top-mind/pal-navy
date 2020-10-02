@@ -24,7 +24,6 @@
 #define PAL_MIDI_H
 
 #include "common.h"
-#include "native_midi/native_midi.h"
 
 /*++
   Purpose:

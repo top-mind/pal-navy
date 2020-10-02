@@ -14,20 +14,9 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $*$(INTER).Td
 
 GTEST_DIR = ../3rd/googletest/googletest
 
-USE_ALSA ?= $(shell echo "int main(){}" | gcc -o /dev/null -x c - -lasound 2>/dev/null && echo 1)
-ifeq (${USE_ALSA},1)
-	MIDI_CFILES = $(wildcard ../native_midi/*.c) native_midi_alsa.c
-	MIDI_CPPFILES =
-	MIDI_LDFLAGS = -lasound
-else
-	MIDI_CFILES =
-	MIDI_CPPFILES = native_midi.cpp
-	MIDI_LDFLAGS =
-endif
-
 SOURCES = .. ../adplug
-CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c)) $(MIDI_CFILES)
-CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp)) unix.cpp $(MIDI_CPPFILES)
+CFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.c))
+CPPFILES = $(foreach dir, $(SOURCES), $(wildcard $(dir)/*.cpp)) unix.cpp
 TOBJFILES = $(CFILES:.c=$(INTER).o) $(CPPFILES:.cpp=$(INTER).o)
 DEPFILES = $(OBJFILES:.o=.d)
 TEST_CPPFILES = $(wildcard ../tests/*.cpp)
@@ -40,7 +29,7 @@ CXX = $(HOST)g++
 override CCFLAGS += `$(SDL_CONFIG) --cflags` -D_GNU_SOURCE -g -Wall -O2 -fno-strict-aliasing $(EXTRA_CCFLAGS) $(TEST_CCFLAGS) $(GENERATED)
 CXXFLAGS = $(CCFLAGS) -std=c++11
 CFLAGS = $(CCFLAGS) -std=gnu99
-LDFLAGS = `$(SDL_CONFIG) --libs` $(MIDI_LDFLAGS) -lstdc++ -lm
+LDFLAGS = `$(SDL_CONFIG) --libs` -lstdc++ -lm
 TEST_CXXFLAGS += -isystem $(GTEST_DIR)/include -I $(GTEST_DIR) -g -Wall -Wextra -pthread
 
 UNAME_S := $(shell uname -s)
