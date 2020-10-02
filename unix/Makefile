@@ -8,8 +8,6 @@ INTER=.unix
 HOST =
 TEST_CCFLAGS =
 
-GENERATED = -DPAL_HAS_GIT_REVISION $(shell ../scripts/gengitrev)
-
 DEPFLAGS = -MT $@ -MMD -MP -MF $*$(INTER).Td
 
 GTEST_DIR = ../3rd/googletest/googletest
@@ -26,7 +24,7 @@ SDL_CONFIG = sdl2-config
 
 CC = $(HOST)gcc
 CXX = $(HOST)g++
-override CCFLAGS += `$(SDL_CONFIG) --cflags` -D_GNU_SOURCE -g -Wall -O2 -fno-strict-aliasing $(EXTRA_CCFLAGS) $(TEST_CCFLAGS) $(GENERATED)
+override CCFLAGS += `$(SDL_CONFIG) --cflags` -D_GNU_SOURCE -g -Wall -O2 -fno-strict-aliasing $(EXTRA_CCFLAGS) $(TEST_CCFLAGS)
 CXXFLAGS = $(CCFLAGS) -std=c++11
 CFLAGS = $(CCFLAGS) -std=gnu99
 LDFLAGS = `$(SDL_CONFIG) --libs` -lstdc++ -lm
