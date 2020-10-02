@@ -2,18 +2,12 @@
 #include <string.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-#if !defined(__MINGW32__) && !defined(__EMSCRIPTEN__)
 # if (defined(_M_IX86) || defined(__i386__) || defined(_M_X64) || defined(__amd64__))
 #  include <xmmintrin.h>
 #  define RESAMPLER_SSE
 # endif
-#endif
 
-#ifdef _MSC_VER
-#define ALIGNED     _declspec(align(16))
-#else
 #define ALIGNED     __attribute__((aligned(16)))
-#endif
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -64,10 +58,7 @@ static float sinc(float x)
 typedef int (*resampler_run)(resampler *, float **, float *);
 
 #ifdef RESAMPLER_SSE
-# ifdef _MSC_VER
-#  include <intrin.h>
-#  pragma warning(disable:4244)
-# elif defined(__clang__) || defined(__GNUC__)
+# if   defined(__clang__) || defined(__GNUC__)
 static inline void __cpuid(int *data, int selector)
 {
 #  if defined(__PIC__) && defined(__i386__)

@@ -1236,10 +1236,6 @@ enum mad_error III_huffdecode(struct mad_bitptr *ptr, mad_fixed_t xr[576],
     }
 
     if (cachesz + bits_left < 0) {
-# if 0 && defined(DEBUG)
-      fprintf(stderr, "huffman count1 overrun (%d bits)\n",
-	      -(cachesz + bits_left));
-# endif
 
       /* technically the bitstream is misformatted, but apparently
 	 some encoders are just a bit sloppy with stuffing bits */
@@ -1250,12 +1246,6 @@ enum mad_error III_huffdecode(struct mad_bitptr *ptr, mad_fixed_t xr[576],
 
   assert(-bits_left <= MAD_BUFFER_GUARD * CHAR_BIT);
 
-# if 0 && defined(DEBUG)
-  if (bits_left < 0)
-    fprintf(stderr, "read %d bits too many\n", -bits_left);
-  else if (cachesz + bits_left > 0)
-    fprintf(stderr, "%d stuffing bits\n", cachesz + bits_left);
-# endif
 
   /* rzero */
   while (xrptr < &xr[576]) {
@@ -2315,7 +2305,6 @@ void III_freqinver(mad_fixed_t sample[18][32], unsigned int sb)
 {
   unsigned int i;
 
-# if 1 || defined(ASO_INTERLEAVE1) || defined(ASO_INTERLEAVE2)
   {
     register mad_fixed_t tmp1, tmp2;
 
@@ -2334,10 +2323,6 @@ void III_freqinver(mad_fixed_t sample[18][32], unsigned int sb)
     sample[15][sb] = -tmp2;
     sample[17][sb] = -tmp1;
   }
-# else
-  for (i = 1; i < 18; i += 2)
-    sample[i][sb] = -sample[i][sb];
-# endif
 }
 
 /*
@@ -2655,13 +2640,6 @@ int mad_layer_III(struct mad_stream *stream, struct mad_frame *frame)
     stream->anc_bitlen = md_len * CHAR_BIT - data_bitlen;
   }
 
-# if 0 && defined(DEBUG)
-  fprintf(stderr,
-	  "main_data_begin:%u, md_len:%u, frame_free:%u, "
-	  "data_bitlen:%u, anc_bitlen: %u\n",
-	  si.main_data_begin, md_len, frame_free,
-	  data_bitlen, stream->anc_bitlen);
-# endif
 
   /* preload main_data buffer with up to 511 bytes for next frame(s) */
 

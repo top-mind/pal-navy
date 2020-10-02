@@ -145,11 +145,3 @@
 #  define FPM_DEFAULT 1
 #endif
 
-#if defined(_MSC_VER)
-#  pragma warning(disable: 4018)
-#  pragma warning(disable: 4146)
-#  pragma warning(disable: 4244)
-#  ifndef _CRT_SECURE_NO_WARNINGS
-#    define _CRT_SECURE_NO_WARNINGS
-#  endif
-#endif

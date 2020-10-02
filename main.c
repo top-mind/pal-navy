@@ -157,13 +157,7 @@ PAL_Shutdown(
    PAL_FreeGlobals();
 
    g_exit_code = exit_code;
-#if !__EMSCRIPTEN__
    longjmp(g_exit_jmp_buf, 1);
-#else
-   SDL_Quit();
-   UTIL_Platform_Quit();
-   return;
-#endif
 }
 
 VOID
@@ -477,7 +471,6 @@ main(
    UTIL_Platform_Startup(argc,argv);
 #endif
 
-#if !__EMSCRIPTEN__
    if (setjmp(g_exit_jmp_buf) != 0)
    {
 	   // A longjmp is made, should exit here
@@ -485,7 +478,6 @@ main(
 	   UTIL_Platform_Quit();
 	   return g_exit_code;
    }
-#endif
 
 #if !defined(UNIT_TEST) || defined(UNIT_TEST_GAME_INIT)
    //

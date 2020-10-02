@@ -27,9 +27,6 @@
 # define PAL_CLASSIC        1
 #endif
 
-#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
-#define _CRT_SECURE_NO_WARNINGS
-#endif
 
 #include <wchar.h>
 #include <stdio.h>
@@ -70,9 +67,6 @@
 #define SDL_TICKS_PASSED(A, B)  ((Sint32)((B) - (A)) <= 0)
 #endif
 
-#ifndef SDL_INIT_CDROM
-# define SDL_INIT_CDROM       0	  /* Compatibility with SDL 1.2 */
-#endif
 
 #ifndef SDL_AUDIO_BITSIZE
 # define SDL_AUDIO_BITSIZE(x)         (x & 0xFF)
@@ -80,50 +74,18 @@
 
 /* This is need when compiled with SDL 1.2 */
 #ifndef SDL_FORCE_INLINE
-#if defined(_MSC_VER)
-#define SDL_FORCE_INLINE __forceinline
-#elif ( (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__) )
+#if   ( (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__) )
 #define SDL_FORCE_INLINE __attribute__((always_inline)) static __inline__
 #else
 #define SDL_FORCE_INLINE static SDL_INLINE
 #endif
 #endif /* SDL_FORCE_INLINE not defined */
 
-#if defined(_MSC_VER)
-# define PAL_FORCE_INLINE static SDL_FORCE_INLINE
-#else
 # define PAL_FORCE_INLINE SDL_FORCE_INLINE
-#endif
 
-#ifdef _WIN32
-
-# include <windows.h>
-# include <io.h>
-
-# if defined(_MSC_VER)
-#  if _MSC_VER < 1900
-#   define vsnprintf _vsnprintf
-#   define snprintf _snprintf
-#  endif
-#  define strdup _strdup
-#  define access _access
-#  pragma warning (disable:4244)
-# endif
-
-# ifndef _LPCBYTE_DEFINED
-#  define _LPCBYTE_DEFINED
-typedef const BYTE *LPCBYTE;
-# endif
-
-# define PAL_MAX_PATH  MAX_PATH
-
-#else
 
 # include <unistd.h>
 # include <dirent.h>
-# ifdef __APPLE__
-#  include <objc/objc.h>
-# endif
 
 # ifndef FALSE
 #  define FALSE               0
@@ -144,9 +106,7 @@ typedef unsigned char       UCHAR, *PUCHAR;
 typedef unsigned short      WORD, *LPWORD;
 typedef unsigned int        DWORD, *LPDWORD;
 typedef int                 INT, *LPINT;
-# if !defined( __APPLE__ ) && !defined( GEKKO )
 typedef int                 BOOL, *LPBOOL;
-# endif
 typedef unsigned int        UINT, *PUINT, UINT32, *PUINT32;
 typedef unsigned char       BYTE, *LPBYTE;
 typedef const BYTE         *LPCBYTE;
@@ -160,7 +120,6 @@ typedef const WCHAR        *LPCWSTR;
 
 # define PAL_MAX_PATH  PATH_MAX
 
-#endif
 
 #ifdef __cplusplus
 # define PAL_C_LINKAGE       extern "C"
@@ -203,9 +162,6 @@ typedef const WCHAR        *LPCWSTR;
 # define PAL_AUDIO_DEFAULT_BUFFER_SIZE   1024
 #endif
 
-#ifndef PAL_HAS_SDLCD
-# define PAL_HAS_SDLCD        0
-#endif
 
 #ifndef PAL_HAS_MP3
 # define PAL_HAS_MP3          1   /* Try always enable MP3. If compilation/run failed, please change this value to 0. */
@@ -221,9 +177,6 @@ typedef const WCHAR        *LPCWSTR;
 # define PAL_CONFIG_PREFIX PAL_PREFIX
 #endif
 
-#ifndef PAL_HAS_NATIVEMIDI
-# define PAL_HAS_NATIVEMIDI  0
-#endif
 
 #ifndef PAL_LARGE
 # define PAL_LARGE

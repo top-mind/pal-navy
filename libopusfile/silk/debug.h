@@ -81,11 +81,7 @@ void silk_TimerSave(char *file_name);
 extern int           silk_Timer_nTimers;
 extern int           silk_Timer_depth_ctr;
 extern char          silk_Timer_tags[silk_NUM_TIMERS_MAX][silk_NUM_TIMERS_MAX_TAG_LEN];
-#ifdef _WIN32
-extern LARGE_INTEGER silk_Timer_start[silk_NUM_TIMERS_MAX];
-#else
 extern unsigned long silk_Timer_start[silk_NUM_TIMERS_MAX];
-#endif
 extern unsigned int  silk_Timer_cnt[silk_NUM_TIMERS_MAX];
 extern opus_int64    silk_Timer_sum[silk_NUM_TIMERS_MAX];
 extern opus_int64    silk_Timer_max[silk_NUM_TIMERS_MAX];
@@ -93,35 +89,6 @@ extern opus_int64    silk_Timer_min[silk_NUM_TIMERS_MAX];
 extern opus_int64    silk_Timer_depth[silk_NUM_TIMERS_MAX];
 
 /* WARNING: TIC()/TOC can measure only up to 0.1 seconds at a time */
-#ifdef _WIN32
-#define TIC(TAG_NAME) {                                     \
-    static int init = 0;                                    \
-    static int ID = -1;                                     \
-    if( init == 0 )                                         \
-    {                                                       \
-        int k;                                              \
-        init = 1;                                           \
-        for( k = 0; k < silk_Timer_nTimers; k++ ) {         \
-            if( strcmp(silk_Timer_tags[k], #TAG_NAME) == 0 ) { \
-                ID = k;                                     \
-                break;                                      \
-            }                                               \
-        }                                                   \
-        if (ID == -1) {                                     \
-            ID = silk_Timer_nTimers;                        \
-            silk_Timer_nTimers++;                           \
-            silk_Timer_depth[ID] = silk_Timer_depth_ctr;    \
-            strcpy(silk_Timer_tags[ID], #TAG_NAME);         \
-            silk_Timer_cnt[ID] = 0;                         \
-            silk_Timer_sum[ID] = 0;                         \
-            silk_Timer_min[ID] = 0xFFFFFFFF;                \
-            silk_Timer_max[ID] = 0;                         \
-        }                                                   \
-    }                                                       \
-    silk_Timer_depth_ctr++;                                 \
-    QueryPerformanceCounter(&silk_Timer_start[ID]);         \
-}
-#else
 #define TIC(TAG_NAME) {                                     \
     static int init = 0;                                    \
     static int ID = -1;                                     \
@@ -149,38 +116,7 @@ extern opus_int64    silk_Timer_depth[silk_NUM_TIMERS_MAX];
     silk_Timer_depth_ctr++;                                 \
     silk_Timer_start[ID] = GetHighResolutionTime();         \
 }
-#endif
 
-#ifdef _WIN32
-#define TOC(TAG_NAME) {                                             \
-    LARGE_INTEGER lpPerformanceCount;                               \
-    static int init = 0;                                            \
-    static int ID = 0;                                              \
-    if( init == 0 )                                                 \
-    {                                                               \
-        int k;                                                      \
-        init = 1;                                                   \
-        for( k = 0; k < silk_Timer_nTimers; k++ ) {                 \
-            if( strcmp(silk_Timer_tags[k], #TAG_NAME) == 0 ) {      \
-                ID = k;                                             \
-                break;                                              \
-            }                                                       \
-        }                                                           \
-    }                                                               \
-    QueryPerformanceCounter(&lpPerformanceCount);                   \
-    lpPerformanceCount.QuadPart -= silk_Timer_start[ID].QuadPart;   \
-    if((lpPerformanceCount.QuadPart < 100000000) &&                 \
-        (lpPerformanceCount.QuadPart >= 0)) {                       \
-        silk_Timer_cnt[ID]++;                                       \
-        silk_Timer_sum[ID] += lpPerformanceCount.QuadPart;          \
-        if( lpPerformanceCount.QuadPart > silk_Timer_max[ID] )      \
-            silk_Timer_max[ID] = lpPerformanceCount.QuadPart;       \
-        if( lpPerformanceCount.QuadPart < silk_Timer_min[ID] )      \
-            silk_Timer_min[ID] = lpPerformanceCount.QuadPart;       \
-    }                                                               \
-    silk_Timer_depth_ctr--;                                         \
-}
-#else
 #define TOC(TAG_NAME) {                                             \
     unsigned long endTime;                                          \
     static int init = 0;                                            \
@@ -209,7 +145,6 @@ extern opus_int64    silk_Timer_depth[silk_NUM_TIMERS_MAX];
     }                                                               \
         silk_Timer_depth_ctr--;                                     \
 }
-#endif
 
 #else /* SILK_TIC_TOC */
 

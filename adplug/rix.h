@@ -22,14 +22,7 @@
 
 #include "player.h"
 
-#if defined(_MSC_VER) && _MSC_VER <= 1600
-#include <windows.h>
-#define uint8_t BYTE
-#define uint16_t WORD
-#define uint32_t DWORD
-#else
 #include <stdint.h>
-#endif
 
 class CrixPlayer: public CPlayer
 {

@@ -210,129 +210,6 @@ static const char *op_parse_file_url(const char *_src){
 }
 
 #if defined(OP_ENABLE_HTTP)
-# if defined(_WIN32)
-#  include <winsock2.h>
-#  include <ws2tcpip.h>
-#  include <openssl/ssl.h>
-#  include <openssl/asn1.h>
-#  include "winerrno.h"
-
-typedef SOCKET op_sock;
-
-#  define OP_INVALID_SOCKET (INVALID_SOCKET)
-
-/*Vista and later support WSAPoll(), but we don't want to rely on that.
-  Instead we re-implement it badly using select().
-  Unfortunately, they define a conflicting struct pollfd, so we only define our
-   own if it looks like that one has not already been defined.*/
-#  if !defined(POLLIN)
-/*Equivalent to POLLIN.*/
-#   define POLLRDNORM (0x0100)
-/*Priority band data can be read.*/
-#   define POLLRDBAND (0x0200)
-/*There is data to read.*/
-#   define POLLIN     (POLLRDNORM|POLLRDBAND)
-/*There is urgent data to read.*/
-#   define POLLPRI    (0x0400)
-/*Equivalent to POLLOUT.*/
-#   define POLLWRNORM (0x0010)
-/*Writing now will not block.*/
-#   define POLLOUT    (POLLWRNORM)
-/*Priority data may be written.*/
-#   define POLLWRBAND (0x0020)
-/*Error condition (output only).*/
-#   define POLLERR    (0x0001)
-/*Hang up (output only).*/
-#   define POLLHUP    (0x0002)
-/*Invalid request: fd not open (output only).*/
-#   define POLLNVAL   (0x0004)
-
-struct pollfd{
-  /*File descriptor.*/
-  op_sock fd;
-  /*Requested events.*/
-  short   events;
-  /*Returned events.*/
-  short   revents;
-};
-#  endif
-
-/*But Winsock never defines nfds_t (it's simply hard-coded to ULONG).*/
-typedef unsigned long nfds_t;
-
-/*The usage of FD_SET() below is O(N^2).
-  This is okay because select() is limited to 64 sockets in Winsock, anyway.
-  In practice, we only ever call it with one or two sockets.*/
-static int op_poll_win32(struct pollfd *_fds,nfds_t _nfds,int _timeout){
-  struct timeval tv;
-  fd_set         ifds;
-  fd_set         ofds;
-  fd_set         efds;
-  nfds_t         i;
-  int            ret;
-  FD_ZERO(&ifds);
-  FD_ZERO(&ofds);
-  FD_ZERO(&efds);
-  for(i=0;i<_nfds;i++){
-    _fds[i].revents=0;
-    if(_fds[i].events&POLLIN)FD_SET(_fds[i].fd,&ifds);
-    if(_fds[i].events&POLLOUT)FD_SET(_fds[i].fd,&ofds);
-    FD_SET(_fds[i].fd,&efds);
-  }
-  if(_timeout>=0){
-    tv.tv_sec=_timeout/1000;
-    tv.tv_usec=(_timeout%1000)*1000;
-  }
-  ret=select(-1,&ifds,&ofds,&efds,_timeout<0?NULL:&tv);
-  if(ret>0){
-    for(i=0;i<_nfds;i++){
-      if(FD_ISSET(_fds[i].fd,&ifds))_fds[i].revents|=POLLIN;
-      if(FD_ISSET(_fds[i].fd,&ofds))_fds[i].revents|=POLLOUT;
-      /*This isn't correct: there are several different things that might have
-         happened to a fd in efds, but I don't know a good way to distinguish
-         them without more context from the caller.
-        It's okay, because we don't actually check any of these bits, we just
-         need _some_ bit set.*/
-      if(FD_ISSET(_fds[i].fd,&efds))_fds[i].revents|=POLLHUP;
-    }
-  }
-  return ret;
-}
-
-/*We define op_errno() to make it clear that it's not an l-value like normal
-   errno is.*/
-#  define op_errno() (WSAGetLastError()?WSAGetLastError()-WSABASEERR:0)
-#  define op_reset_errno() (WSASetLastError(0))
-
-/*The remaining functions don't get an op_ prefix even though they only
-   operate on sockets, because we don't use non-socket I/O here, and this
-   minimizes the changes needed to deal with Winsock.*/
-#  define close(_fd) closesocket(_fd)
-/*This takes an int for the address length, even though the value is of type
-   socklen_t (defined as an unsigned integer type with at least 32 bits).*/
-#  define connect(_fd,_addr,_addrlen) \
- (OP_UNLIKELY((_addrlen)>(socklen_t)INT_MAX)? \
-  WSASetLastError(WSA_NOT_ENOUGH_MEMORY),-1: \
-  connect(_fd,_addr,(int)(_addrlen)))
-/*This relies on sizeof(u_long)==sizeof(int), which is always true on both
-   Win32 and Win64.*/
-#  define ioctl(_fd,_req,_arg) ioctlsocket(_fd,_req,(u_long *)(_arg))
-#  define getsockopt(_fd,_level,_name,_val,_len) \
- getsockopt(_fd,_level,_name,(char *)(_val),_len)
-#  define setsockopt(_fd,_level,_name,_val,_len) \
- setsockopt(_fd,_level,_name,(const char *)(_val),_len)
-#  define poll(_fds,_nfds,_timeout) op_poll_win32(_fds,_nfds,_timeout)
-
-#  if defined(_MSC_VER)
-typedef ptrdiff_t ssize_t;
-#  endif
-
-/*Load certificates from the built-in certificate store.*/
-int SSL_CTX_set_default_verify_paths_win32(SSL_CTX *_ssl_ctx);
-#  define SSL_CTX_set_default_verify_paths \
- SSL_CTX_set_default_verify_paths_win32
-
-# else
 /*Normal Berkeley sockets.*/
 #  include <sys/ioctl.h>
 #  include <sys/types.h>
@@ -354,7 +231,6 @@ typedef int op_sock;
 #  define op_errno() (errno)
 #  define op_reset_errno() (errno=0)
 
-# endif
 # include <sys/timeb.h>
 # include <openssl/x509v3.h>
 
@@ -742,16 +618,12 @@ static struct addrinfo *op_resolve(const char *_host,unsigned _port){
 }
 
 static int op_sock_set_nonblocking(op_sock _fd,int _nonblocking){
-#if !defined(_WIN32)
   int flags;
   flags=fcntl(_fd,F_GETFL);
   if(OP_UNLIKELY(flags<0))return flags;
   if(_nonblocking)flags|=O_NONBLOCK;
   else flags&=~O_NONBLOCK;
   return fcntl(_fd,F_SETFL,flags);
-#else
-  return ioctl(_fd,FIONBIO,&_nonblocking);
-#endif
 }
 
 /*Disable/enable write coalescing if we can.
@@ -772,13 +644,6 @@ static void op_sock_set_tcp_nodelay(op_sock _fd,int _nodelay){
 # endif
 }
 
-#if defined(_WIN32)
-static void op_init_winsock(){
-  static LONG    count;
-  static WSADATA wsadata;
-  if(InterlockedIncrement(&count)==1)WSAStartup(0x0202,&wsadata);
-}
-#endif
 
 /*A single physical connection to an HTTP server.
   We may have several of these open at once.*/
@@ -2288,9 +2153,6 @@ static int op_http_stream_open(OpusHTTPStream *_stream,const char *_url,
   struct addrinfo *addrs;
   int              nredirs;
   int              ret;
-#if defined(_WIN32)
-  op_init_winsock();
-#endif
   ret=op_parse_url(&_stream->url,_url);
   if(OP_UNLIKELY(ret<0))return ret;
   if(_proxy_host!=NULL){

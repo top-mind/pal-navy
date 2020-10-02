@@ -44,54 +44,7 @@
 #define OPUS_CPU_ARM_MEDIA_FLAG (1<<OPUS_ARCH_ARM_MEDIA)
 #define OPUS_CPU_ARM_NEON_FLAG  (1<<OPUS_ARCH_ARM_NEON)
 
-#if defined(_MSC_VER)
-/*For GetExceptionCode() and EXCEPTION_ILLEGAL_INSTRUCTION.*/
-# define WIN32_LEAN_AND_MEAN
-# define WIN32_EXTRA_LEAN
-# include <windows.h>
-
-static OPUS_INLINE opus_uint32 opus_cpu_capabilities(void){
-  opus_uint32 flags;
-  flags=0;
-  /* MSVC has no OPUS_INLINE __asm support for ARM, but it does let you __emit
-   * instructions via their assembled hex code.
-   * All of these instructions should be essentially nops. */
-# if defined(OPUS_ARM_MAY_HAVE_EDSP) || defined(OPUS_ARM_MAY_HAVE_MEDIA) \
- || defined(OPUS_ARM_MAY_HAVE_NEON) || defined(OPUS_ARM_MAY_HAVE_NEON_INTR)
-  __try{
-    /*PLD [r13]*/
-    __emit(0xF5DDF000);
-    flags|=OPUS_CPU_ARM_EDSP_FLAG;
-  }
-  __except(GetExceptionCode()==EXCEPTION_ILLEGAL_INSTRUCTION){
-    /*Ignore exception.*/
-  }
-#  if defined(OPUS_ARM_MAY_HAVE_MEDIA) \
- || defined(OPUS_ARM_MAY_HAVE_NEON) || defined(OPUS_ARM_MAY_HAVE_NEON_INTR)
-  __try{
-    /*SHADD8 r3,r3,r3*/
-    __emit(0xE6333F93);
-    flags|=OPUS_CPU_ARM_MEDIA_FLAG;
-  }
-  __except(GetExceptionCode()==EXCEPTION_ILLEGAL_INSTRUCTION){
-    /*Ignore exception.*/
-  }
-#   if defined(OPUS_ARM_MAY_HAVE_NEON) || defined(OPUS_ARM_MAY_HAVE_NEON_INTR)
-  __try{
-    /*VORR q0,q0,q0*/
-    __emit(0xF2200150);
-    flags|=OPUS_CPU_ARM_NEON_FLAG;
-  }
-  __except(GetExceptionCode()==EXCEPTION_ILLEGAL_INSTRUCTION){
-    /*Ignore exception.*/
-  }
-#   endif
-#  endif
-# endif
-  return flags;
-}
-
-#elif defined(__linux__)
+#if   defined(__linux__)
 /* Linux based */
 opus_uint32 opus_cpu_capabilities(void)
 {

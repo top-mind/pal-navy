@@ -43,9 +43,6 @@ typedef struct tagAUDIODEVICE
    SDL_AudioSpec             spec;		/* Actual-used sound specification */
    AUDIOPLAYER              *pMusPlayer;
    AUDIOPLAYER              *pCDPlayer;
-#if PAL_HAS_SDLCD
-   SDL_CD                   *pCD;
-#endif
    AUDIOPLAYER              *pSoundPlayer;
    void                     *pSoundBuffer;	/* The output buffer for sound */
 #if SDL_VERSION_ATLEAST(2,0,0)
@@ -311,27 +308,6 @@ AUDIO_OpenDevice(
    {
    case CD_SDLCD:
    {
-#if PAL_HAS_SDLCD
-	   int i;
-	   gAudioDevice.pCD = NULL;
-
-	   for (i = 0; i < SDL_CDNumDrives(); i++)
-	   {
-		   gAudioDevice.pCD = SDL_CDOpen(i);
-		   if (gAudioDevice.pCD != NULL)
-		   {
-			   if (!CD_INDRIVE(SDL_CDStatus(gAudioDevice.pCD)))
-			   {
-				   SDL_CDClose(gAudioDevice.pCD);
-				   gAudioDevice.pCD = NULL;
-			   }
-			   else
-			   {
-				   break;
-			   }
-		   }
-	   }
-#endif
 	   gAudioDevice.pCDPlayer = NULL;
 	   break;
    }
@@ -396,13 +372,6 @@ AUDIO_CloseDevice(
 	   gAudioDevice.pCDPlayer = NULL;
    }
 
-#if PAL_HAS_SDLCD
-   if (gAudioDevice.pCD != NULL)
-   {
-      AUDIO_PlayCDTrack(-1);
-      SDL_CDClose(gAudioDevice.pCD);
-   }
-#endif
 
    if (gAudioDevice.pSoundBuffer != NULL)
    {
@@ -579,23 +548,6 @@ AUDIO_PlayCDTrack(
    {
        return TRUE;
    }
-#if PAL_HAS_SDLCD
-   if (gAudioDevice.pCD != NULL)
-   {
-      if (CD_INDRIVE(SDL_CDStatus(gAudioDevice.pCD)))
-      {
-         SDL_CDStop(gAudioDevice.pCD);
-
-         if (iNumTrack != -1)
-         {
-            if (SDL_CDPlayTracks(gAudioDevice.pCD, iNumTrack - 1, 0, 1, 0) == 0)
-            {
-               return TRUE;
-            }
-         }
-      }
-   }
-#endif
    AUDIO_Lock();
    if (gAudioDevice.pCDPlayer)
    {

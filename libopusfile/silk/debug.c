@@ -34,33 +34,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #if SILK_TIC_TOC
 
-#ifdef _WIN32
-
-#if (defined(_WIN32) || defined(_WINCE))
-#include <windows.h>    /* timer */
-#else   /* Linux or Mac*/
-#include <sys/time.h>
-#endif
-
-unsigned long silk_GetHighResolutionTime(void) /* O  time in usec*/
-{
-    /* Returns a time counter in microsec   */
-    /* the resolution is platform dependent */
-    /* but is typically 1.62 us resolution  */
-    LARGE_INTEGER lpPerformanceCount;
-    LARGE_INTEGER lpFrequency;
-    QueryPerformanceCounter(&lpPerformanceCount);
-    QueryPerformanceFrequency(&lpFrequency);
-    return (unsigned long)((1000000*(lpPerformanceCount.QuadPart)) / lpFrequency.QuadPart);
-}
-#else   /* Linux or Mac*/
 unsigned long GetHighResolutionTime(void) /* O  time in usec*/
 {
     struct timeval tv;
     gettimeofday(&tv, 0);
     return((tv.tv_sec*1000000)+(tv.tv_usec));
 }
-#endif
 
 int           silk_Timer_nTimers = 0;
 int           silk_Timer_depth_ctr = 0;

@@ -31,8 +31,6 @@
 
 #  ifdef __GNUC__
 #    define STIN static __inline__
-#  elif _WIN32
-#    define STIN static __inline
 #  else
 #    define STIN static
 #  endif
@@ -45,12 +43,6 @@
 #  define M_PI (3.1415926536f)
 #endif
 
-#if defined(_WIN32) && !defined(__SYMBIAN32__)
-#  include <malloc.h>
-#  define rint(x)   (floor((x)+0.5f))
-#  define NO_FLOAT_MATH_LIB
-#  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
-#endif
 
 #if defined(__SYMBIAN32__) && defined(__WINS__)
 void *_alloca(size_t size);
@@ -120,29 +112,6 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
 
 /* MSVC inline assembly. 32 bit only; inline ASM isn't implemented in the
  * 64 bit compiler */
-#if defined(_MSC_VER) && !defined(_WIN64) && !defined(_WIN32_WCE) && !defined(_M_ARM)
-#  define VORBIS_FPU_CONTROL
-
-typedef ogg_int16_t vorbis_fpu_control;
-
-static __inline int vorbis_ftoi(double f){
-        int i;
-        __asm{
-                fld f
-                fistp i
-        }
-        return i;
-}
-
-static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
-  (void)fpu;
-}
-
-static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
-  (void)fpu;
-}
-
-#endif /* Special MSVC 32 bit implementation */
 
 
 /* Optimized code path for x86_64 builds. Uses SSE2 intrinsics. This can be

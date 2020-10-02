@@ -942,17 +942,11 @@ VIDEO_SaveScreenshot(
 --*/
 {
 	char filename[32];
-#ifdef _WIN32
-	SYSTEMTIME st;
-	GetLocalTime(&st);
-	sprintf(filename, "%04d%02d%02d%02d%02d%02d%03d.bmp", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
-#elif !defined( GEKKO )
 	struct timeval tv;
 	struct tm *ptm;
 	gettimeofday(&tv, NULL);
 	ptm = localtime(&tv.tv_sec);
 	sprintf(filename, "%04d%02d%02d%02d%02d%02d%03d.bmp", ptm->tm_year + 1900, ptm->tm_mon, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, (int)(tv.tv_usec / 1000));
-#endif
 
 	//
 	// Save the screenshot.

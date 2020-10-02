@@ -24,9 +24,6 @@
 #include <math.h>
 
 volatile PALINPUTSTATE   g_InputState;
-#if PAL_HAS_JOYSTICKS
-static SDL_Joystick     *g_pJoy = NULL;
-#endif
 
 #if !SDL_VERSION_ATLEAST(2,0,0)
 # define SDLK_KP_1     SDLK_KP1
@@ -351,174 +348,6 @@ PAL_MouseEventFilter(
 
 --*/
 {
-#if PAL_HAS_MOUSE
-   static short hitTest = 0; // Double click detect;   
-   const SDL_VideoInfo *vi;
-
-   double       screenWidth, gridWidth;
-   double       screenHeight, gridHeight;
-   double       mx, my;
-   double       thumbx;
-   double       thumby;
-   INT          gridIndex;
-   BOOL         isLeftMouseDBClick = FALSE;
-   BOOL         isLeftMouseClick = FALSE;
-   BOOL         isRightMouseClick = FALSE;
-   static INT   lastReleaseButtonTime, lastPressButtonTime, betweenTime;
-   static INT   lastPressx = 0;
-   static INT   lastPressy = 0;
-   static INT   lastReleasex = 0;
-   static INT   lastReleasey = 0;
-
-   if (lpEvent->type!= SDL_MOUSEBUTTONDOWN && lpEvent->type != SDL_MOUSEBUTTONUP)
-      return;
-
-   vi = SDL_GetVideoInfo();
-   screenWidth = vi->current_w;
-   screenHeight = vi->current_h;
-   gridWidth = screenWidth / 3;
-   gridHeight = screenHeight / 3;
-   mx = lpEvent->button.x;
-   my = lpEvent->button.y;
-   thumbx = ceil(mx / gridWidth);
-   thumby = floor(my / gridHeight);
-   gridIndex = thumbx + thumby * 3 - 1;
-   
-   switch (lpEvent->type)
-   {
-   case SDL_MOUSEBUTTONDOWN:
-      lastPressButtonTime = SDL_GetTicks();
-      lastPressx = lpEvent->button.x;
-      lastPressy = lpEvent->button.y;
-      switch (gridIndex)
-      {
-      case 2:
-         g_InputState.prevdir = g_InputState.dir;
-         g_InputState.dir = kDirNorth;
-         break;
-      case 6:
-         g_InputState.prevdir = g_InputState.dir;
-         g_InputState.dir = kDirSouth;
-         break;
-      case 0:
-         g_InputState.prevdir = g_InputState.dir;
-         g_InputState.dir = kDirWest;
-         break;
-      case 8:
-         g_InputState.prevdir = g_InputState.dir;
-         g_InputState.dir = kDirEast;
-         break;
-      case 1:
-        //g_InputState.prevdir = g_InputState.dir;
-        //g_InputState.dir = kDirNorth;
-         g_InputState.dwKeyPress |= kKeyUp;
-         break;
-      case 7:
-        //g_InputState.prevdir = g_InputState.dir;
-        //g_InputState.dir = kDirSouth; 
-         g_InputState.dwKeyPress |= kKeyDown;
-         break;
-      case 3:
-        //g_InputState.prevdir = g_InputState.dir;
-        //g_InputState.dir = kDirWest;
-        g_InputState.dwKeyPress |= kKeyLeft;
-         break;
-      case 5:
-         //g_InputState.prevdir = g_InputState.dir;
-         //g_InputState.dir = kDirEast;
-         g_InputState.dwKeyPress |= kKeyRight;
-         break;
-      }
-      break;
-   case SDL_MOUSEBUTTONUP:
-      lastReleaseButtonTime = SDL_GetTicks();
-      lastReleasex = lpEvent->button.x;
-      lastReleasey = lpEvent->button.y;
-      hitTest ++;
-      if (abs(lastPressx - lastReleasex) < 25 &&
-                     abs(lastPressy - lastReleasey) < 25)
-      {
-        betweenTime = lastReleaseButtonTime - lastPressButtonTime;
-        if (betweenTime >500)
-        {
-           isRightMouseClick = TRUE;
-        }
-        else if (betweenTime >=0)
-        {
-           if((betweenTime < 100) && (hitTest >= 2))
-           {
-              isLeftMouseClick = TRUE;
-                hitTest = 0;  
-           }
-           else
-           {  
-              isLeftMouseClick = TRUE;
-              if(betweenTime > 100)
-              {
-                 hitTest = 0;
-              }
-              
-           }
-        }
-      }
-      switch (gridIndex)
-      {
-      case 2:
-        if( isLeftMouseDBClick )
-       {
-          AUDIO_IncreaseVolume();
-          break;
-       }
-      case 6:
-      case 0:
-        if( isLeftMouseDBClick )
-       {
-          AUDIO_DecreaseVolume();
-          break;
-       }
-      case 7:
-         if (isRightMouseClick) //repeat attack
-         {
-            g_InputState.dwKeyPress |= kKeyRepeat;
-            break;
-         }
-      case 8:
-         g_InputState.dir = kDirUnknown;
-         g_InputState.prevdir = kDirUnknown;
-         break;
-      case 1:
-        if( isRightMouseClick )
-       {
-          g_InputState.dwKeyPress |= kKeyForce;
-       }
-        break;
-      case 3:
-        if( isRightMouseClick )
-       {
-          g_InputState.dwKeyPress |= kKeyAuto;
-       }
-        break;
-      case 5:
-        if( isRightMouseClick )
-       {
-          g_InputState.dwKeyPress |= kKeyDefend;
-       }
-       break;
-      case 4:
-      if (isRightMouseClick) // menu
-      {
-         g_InputState.dwKeyPress |= kKeyMenu;
-      }
-      else if (isLeftMouseClick) // search
-      {
-         g_InputState.dwKeyPress |= kKeySearch;
-      }
-      
-        break;
-      }
-      break;
-   }
-#endif
 }
 
 static VOID
@@ -540,170 +369,8 @@ PAL_JoystickEventFilter(
 
 --*/
 {
-#if PAL_HAS_JOYSTICKS
-   switch (lpEvent->type)
-   {
-   case SDL_JOYAXISMOTION:
-      g_InputState.joystickNeedUpdate = TRUE;
-      //
-      // Moved an axis on joystick
-      //
-      switch (lpEvent->jaxis.axis)
-      {
-      case 0:
-         //
-         // X axis
-         //
-         if (lpEvent->jaxis.value > 3200)
-         {
-            g_InputState.axisX = 1;
-         }
-         else if (lpEvent->jaxis.value < -3200)
-         {
-            g_InputState.axisX = -1;
-         }
-         else
-         {
-            g_InputState.axisX = 0;
-         }
-         break;
-
-      case 1:
-         //
-         // Y axis
-         //
-         if (lpEvent->jaxis.value > 3200)
-         {
-            g_InputState.axisY = 1;
-         }
-         else if (lpEvent->jaxis.value < -3200)
-         {
-            g_InputState.axisY = -1;
-         }
-         else
-         {
-            g_InputState.axisY = 0;
-         }
-         break;
-      }
-      break;
-
-   case SDL_JOYHATMOTION:
-      //
-      // Pressed the joystick hat button
-      //
-      switch (lpEvent->jhat.value)
-      {
-         case SDL_HAT_LEFT:
-         case SDL_HAT_LEFTUP:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
-            g_InputState.dir = kDirWest;
-            g_InputState.dwKeyPress = kKeyLeft;
-            break;
-
-         case SDL_HAT_RIGHT:
-         case SDL_HAT_RIGHTDOWN:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
-            g_InputState.dir = kDirEast;
-            g_InputState.dwKeyPress = kKeyRight;
-            break;
-
-         case SDL_HAT_UP:
-         case SDL_HAT_RIGHTUP:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
-            g_InputState.dir = kDirNorth;
-            g_InputState.dwKeyPress = kKeyUp;
-            break;
-
-         case SDL_HAT_DOWN:
-         case SDL_HAT_LEFTDOWN:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
-            g_InputState.dir = kDirSouth;
-            g_InputState.dwKeyPress = kKeyDown;
-            break;
-
-         case SDL_HAT_CENTERED:
-            g_InputState.prevdir = (gpGlobals->fInBattle ? kDirUnknown : g_InputState.dir);
-            g_InputState.dir = kDirUnknown;
-            g_InputState.dwKeyPress = kKeyNone;
-            break;
-      }
-      break;
-
-   case SDL_JOYBUTTONDOWN:
-      //
-      // Pressed the joystick button
-      //
-      switch (lpEvent->jbutton.button & 1)
-      {
-      case 0:
-         g_InputState.dwKeyPress |= kKeyMenu;
-         break;
-
-      case 1:
-         g_InputState.dwKeyPress |= kKeySearch;
-         break;
-      }
-      break;
-   }
-#endif
 }
 
-#if PAL_HAS_JOYSTICKS
-
-static VOID
-PAL_UpdateJoyStickState(
-VOID
-)
-/*++
- Purpose:
- 
- Poll & update joystick state.
- 
- Parameters:
- 
- None.
- 
- Return value:
- 
- None.
- 
- --*/
-{
-   if( g_InputState.axisX == 1 && g_InputState.axisY >= 0 )
-   {
-      g_InputState.prevdir = g_InputState.dir;
-      g_InputState.dir = kDirEast;
-      g_InputState.dwKeyPress |= kKeyRight;
-   }
-   else if( g_InputState.axisX == -1 && g_InputState.axisY <= 0 )
-   {
-      g_InputState.prevdir = g_InputState.dir;
-      g_InputState.dir = kDirWest;
-      g_InputState.dwKeyPress |= kKeyLeft;
-   }
-   else if( g_InputState.axisY == 1 && g_InputState.axisX <= 0 )
-   {
-      g_InputState.prevdir = g_InputState.dir;
-      g_InputState.dir = kDirSouth;
-      g_InputState.dwKeyPress |= kKeyDown;
-   }
-   else if( g_InputState.axisY == -1 && g_InputState.axisX >= 0 )
-   {
-      g_InputState.prevdir = g_InputState.dir;
-      g_InputState.dir = kDirNorth;
-      g_InputState.dwKeyPress |= kKeyUp;
-   }
-   else
-   {
-      g_InputState.prevdir = g_InputState.dir;
-      g_InputState.dir = kDirUnknown;
-      if(!input_event_filter)
-         g_InputState.dwKeyPress = kKeyNone;
-   }
-}
-
-#endif
 
 #if PAL_HAS_TOUCH
 
@@ -1104,25 +771,6 @@ PAL_InitInput(
    //
    // Check for joystick
    //
-#if PAL_HAS_JOYSTICKS
-   if (SDL_NumJoysticks() > 0 && g_fUseJoystick)
-   {
-      int i;
-	  for (i = 0; i < SDL_NumJoysticks(); i++)
-      {
-         if (PAL_IS_VALID_JOYSTICK(SDL_JoystickNameForIndex(i)))
-         {
-            g_pJoy = SDL_JoystickOpen(i);
-            break;
-         }
-      }
-
-      if (g_pJoy != NULL)
-      {
-         SDL_JoystickEventState(SDL_ENABLE);
-      }
-   }
-#endif
 
    input_init_filter();
 }
@@ -1146,13 +794,6 @@ PAL_ShutdownInput(
 
 --*/
 {
-#if PAL_HAS_JOYSTICKS
-   if (g_pJoy != NULL)
-   {
-      SDL_JoystickClose(g_pJoy);
-      g_pJoy = NULL;
-   }
-#endif
    input_shutdown_filter();
 }
 
@@ -1210,16 +851,9 @@ PAL_ProcessEvent(
 
 --*/
 {
-#if PAL_HAS_JOYSTICKS
-   g_InputState.joystickNeedUpdate = FALSE;
-#endif
    while (PAL_PollEvent(NULL));
 
    PAL_UpdateKeyboardState();
-#if PAL_HAS_JOYSTICKS
-   if(g_InputState.joystickNeedUpdate)
-      PAL_UpdateJoyStickState();
-#endif
 #if PAL_HAS_TOUCH
    PAL_TouchRepeatCheck();
 #endif

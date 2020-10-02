@@ -20,11 +20,6 @@
 #ifndef H_BINIO_BINIO
 #define H_BINIO_BINIO
 
-#ifdef _MSC_VER
-#pragma warning (disable:4244)
-#pragma warning (disable:4996)
-#pragma warning (disable:4267)
-#endif
 
 /***** Configuration *****/
 
@@ -58,11 +53,7 @@
 
 /***** Implementation *****/
 
-#ifdef _MSC_VER
-#	pragma warning(disable: 4250)
-#else
 #   define __int64 long long
-#endif
 
 #if BINIO_ENABLE_STRING
 #include <string>

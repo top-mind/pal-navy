@@ -425,8 +425,6 @@ PAL_LoadConfig(
 						eCDType = CD_OGG;
 					else if (PAL_HAS_OPUS && SDL_strncasecmp(value.sValue, "OPUS", slen) == 0)
 						eCDType = CD_OPUS;
-					else if (PAL_HAS_SDLCD && SDL_strncasecmp(value.sValue, "RAW", slen) == 0)
-						eCDType = CD_SDLCD;
 					break;
 				}
 				case PALCFG_MUSIC:

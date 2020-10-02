@@ -26,9 +26,6 @@
 #ifndef PAL_CONFIG_H
 # define PAL_CONFIG_H
 
-# ifndef PAL_HAS_JOYSTICKS
-#  define PAL_HAS_JOYSTICKS    1
-# endif
 
 # if SDL_MAJOR_VERSION == 1 && SDL_MINOR_VERSION <= 2
 #  define PAL_HAS_SDLCD         1
@@ -53,7 +50,7 @@
 #  define PAL_FATAL_OUTPUT(s)   system(PAL_va(0, "beep; xmessage -center \"FATAL ERROR: %s\"", (s)))
 # endif
 
-# define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_CDROM | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
+# define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
 
 # define PAL_PLATFORM         NULL
 # define PAL_CREDIT           NULL

@@ -30,10 +30,6 @@ typedef struct tagPALINPUTSTATE
 {
    PALDIRECTION           dir, prevdir;
    DWORD                  dwKeyPress;
-#if PAL_HAS_JOYSTICKS
-   int                    axisX,axisY;
-   BOOL                   joystickNeedUpdate;
-#endif
 } PALINPUTSTATE;
 
 enum PALKEY

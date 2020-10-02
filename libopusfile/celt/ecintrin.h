@@ -48,19 +48,7 @@
 /*Count leading zeros.
   This macro should only be used for implementing ec_ilog(), if it is defined.
   All other code should use EC_ILOG() instead.*/
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-# include <intrin.h>
-/*In _DEBUG mode this is not an intrinsic by default.*/
-# pragma intrinsic(_BitScanReverse)
-
-static __inline int ec_bsr(unsigned long _x){
-  unsigned long ret;
-  _BitScanReverse(&ret,_x);
-  return (int)ret;
-}
-# define EC_CLZ0    (1)
-# define EC_CLZ(_x) (-ec_bsr(_x))
-#elif defined(ENABLE_TI_DSPLIB)
+#if   defined(ENABLE_TI_DSPLIB)
 # include "dsplib.h"
 # define EC_CLZ0    (31)
 # define EC_CLZ(_x) (_lnorm(_x))

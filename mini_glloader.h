@@ -32,9 +32,6 @@
 #define glGenVertexArrays glGenVertexArraysOES
 #define glBindVertexArray glBindVertexArrayOES
 #else
-#ifdef __APPLE__
-#define GL_GLEXT_PROTOTYPES
-#endif
 #include <SDL_video.h>
 #include <SDL_opengl.h>
 #endif
@@ -44,7 +41,6 @@
 #undef FORCE_OPENGL_CORE_PROFILE
 #endif
 
-#if !defined(__APPLE__)
 
 //avoid manually imported glfuncs conflicts with platform-builtin ones, like emscripten
 #define glCreateShader _glCreateShader
@@ -110,6 +106,5 @@ extern PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation;
 extern PFNGLGETSTRINGIPROC glGetStringi;
 
 extern int initGLExtensions(int major);
-#endif
 
 #endif /* mini_glloader_h */

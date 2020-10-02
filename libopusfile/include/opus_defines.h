@@ -89,8 +89,6 @@ extern "C" {
 #if (!defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L) )
 # if OPUS_GNUC_PREREQ(3,0)
 #  define OPUS_RESTRICT __restrict__
-# elif (defined(_MSC_VER) && _MSC_VER >= 1400)
-#  define OPUS_RESTRICT __restrict
 # else
 #  define OPUS_RESTRICT
 # endif
@@ -101,8 +99,6 @@ extern "C" {
 #if (!defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L) )
 # if OPUS_GNUC_PREREQ(2,7)
 #  define OPUS_INLINE __inline__
-# elif (defined(_MSC_VER))
-#  define OPUS_INLINE __inline
 # else
 #  define OPUS_INLINE
 # endif

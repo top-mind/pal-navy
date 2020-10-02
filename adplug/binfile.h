@@ -24,10 +24,6 @@
 
 #include "binio.h"
 
-#ifdef _MSC_VER
-#pragma warning (disable:4244)
-#pragma warning (disable:4996)
-#endif
 
 class binfbase: virtual public binio {
 public:

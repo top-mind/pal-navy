@@ -526,42 +526,24 @@ STBIDEF int   stbi_zlib_decode_noheader_buffer(char *obuffer, int olen, const ch
 #endif
 
 
-#ifndef _MSC_VER
    #ifdef __cplusplus
    #define stbi_inline inline
    #else
    #define stbi_inline
    #endif
-#else
-   #define stbi_inline __forceinline
-#endif
 
 
-#ifdef _MSC_VER
-typedef unsigned short stbi__uint16;
-typedef   signed short stbi__int16;
-typedef unsigned int   stbi__uint32;
-typedef   signed int   stbi__int32;
-#else
 #include <stdint.h>
 typedef uint16_t stbi__uint16;
 typedef int16_t  stbi__int16;
 typedef uint32_t stbi__uint32;
 typedef int32_t  stbi__int32;
-#endif
 
 // should produce compiler error if size is wrong
 typedef unsigned char validate_uint32[sizeof(stbi__uint32)==4 ? 1 : -1];
 
-#ifdef _MSC_VER
-#define STBI_NOTUSED(v)  (void)(v)
-#else
 #define STBI_NOTUSED(v)  (void)sizeof(v)
-#endif
 
-#ifdef _MSC_VER
-#define STBI_HAS_LROTL
-#endif
 
 #ifdef STBI_HAS_LROTL
    #define stbi_lrot(x,y)  _lrotl(x,y)
@@ -605,56 +587,11 @@ typedef unsigned char validate_uint32[sizeof(stbi__uint32)==4 ? 1 : -1];
 #define STBI_NO_SIMD
 #endif
 
-#if defined(__MINGW32__) && defined(STBI__X86_TARGET) && !defined(STBI_MINGW_ENABLE_SSE2) && !defined(STBI_NO_SIMD)
-// Note that __MINGW32__ doesn't actually mean 32-bit, so we have to avoid STBI__X64_TARGET
-//
-// 32-bit MinGW wants ESP to be 16-byte aligned, but this is not in the
-// Windows ABI and VC++ as well as Windows DLLs don't maintain that invariant.
-// As a result, enabling SSE2 on 32-bit MinGW is dangerous when not
-// simultaneously enabling "-mstackrealign".
-//
-// See https://github.com/nothings/stb/issues/81 for more information.
-//
-// So default to no SSE2 on 32-bit MinGW. If you've read this far and added
-// -mstackrealign to your build settings, feel free to #define STBI_MINGW_ENABLE_SSE2.
-#define STBI_NO_SIMD
-#endif
 
 #if !defined(STBI_NO_SIMD) && (defined(STBI__X86_TARGET) || defined(STBI__X64_TARGET))
 #define STBI_SSE2
 #include <emmintrin.h>
 
-#ifdef _MSC_VER
-
-#if _MSC_VER >= 1400  // not VC6
-#include <intrin.h> // __cpuid
-static int stbi__cpuid3(void)
-{
-   int info[4];
-   __cpuid(info,1);
-   return info[3];
-}
-#else
-static int stbi__cpuid3(void)
-{
-   int res;
-   __asm {
-      mov  eax,1
-      cpuid
-      mov  res,edx
-   }
-   return res;
-}
-#endif
-
-#define STBI_SIMD_ALIGN(type, name) __declspec(align(16)) type name
-
-static int stbi__sse2_available(void)
-{
-   int info3 = stbi__cpuid3();
-   return ((info3 >> 26) & 1) != 0;
-}
-#else // assume GCC-style if not VC++
 #define STBI_SIMD_ALIGN(type, name) type name __attribute__((aligned(16)))
 
 static int stbi__sse2_available(void)
@@ -664,7 +601,6 @@ static int stbi__sse2_available(void)
    // instructions at will, and so are we.
    return 1;
 }
-#endif
 #endif
 
 // ARM NEON
@@ -1146,12 +1082,7 @@ static void stbi__float_postprocess(float *result, int *x, int *y, int *comp, in
 static FILE *stbi__fopen(char const *filename, char const *mode)
 {
    FILE *f;
-#if defined(_MSC_VER) && _MSC_VER >= 1400
-   if (0 != fopen_s(&f, filename, mode))
-      f=0;
-#else
    f = fopen(filename, mode);
-#endif
    return f;
 }
 

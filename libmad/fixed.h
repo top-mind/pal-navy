@@ -34,11 +34,7 @@ typedef   signed long mad_fixed64hi_t;
 typedef unsigned long mad_fixed64lo_t;
 # endif
 
-# if defined(_MSC_VER)
-#  define mad_fixed64_t  signed __int64
-# elif 1 || defined(__GNUC__)
 #  define mad_fixed64_t  signed long long
-# endif
 
 # if defined(FPM_FLOAT)
 typedef double mad_sample_t;
@@ -139,29 +135,6 @@ typedef mad_fixed_t mad_sample_t;
 
 # elif defined(FPM_INTEL)
 
-#  if defined(_MSC_VER)
-#   pragma warning(push)
-#   pragma warning(disable: 4035)  /* no return value */
-static __forceinline
-mad_fixed_t mad_f_mul_inline(mad_fixed_t x, mad_fixed_t y)
-{
-  enum {
-    fracbits = MAD_F_FRACBITS
-  };
-
-  __asm {
-    mov eax, x
-    imul y
-    shrd eax, edx, fracbits
-  }
-
-  /* implicit return of eax */
-}
-#   pragma warning(pop)
-
-#   define mad_f_mul		mad_f_mul_inline
-#   define mad_f_scale64
-#  else
 /*
  * This Intel version is fast and accurate; the disposition of the least
  * significant bit depends on OPT_ACCURACY via mad_f_scale64().
@@ -235,7 +208,6 @@ mad_fixed_t mad_f_mul_inline(mad_fixed_t x, mad_fixed_t y)
 #   endif  /* OPT_ACCURACY */
 
 #   define MAD_F_SCALEBITS  MAD_F_FRACBITS
-#  endif
 
 /* --- ARM ----------------------------------------------------------------- */
 

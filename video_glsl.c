@@ -966,10 +966,8 @@ void VIDEO_GLSL_Setup() {
     char *glslversion = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
     SDL_sscanf(glversion, "%d.%d", &glversion_major, &glversion_minor);
     if(!strncmp(rendererInfo.name, "opengl", 6)) {
-#     ifndef __APPLE__
         if (!initGLExtensions(glversion_major))
             UTIL_LogOutput(LOGLEVEL_FATAL,  "Couldn't init GL extensions!\n" );
-#     endif
 	}
 	else
 		UTIL_LogOutput(LOGLEVEL_FATAL, "OpenGL initial failed, check your code!\n");
@@ -996,20 +994,14 @@ void VIDEO_GLSL_Setup() {
     
     // iOS native GLES supports VAO extension
 #if GLES
-#if !defined(__APPLE__)
     if(!strncmp(glversion, "OpenGL ES", 9)) {
         SDL_sscanf(glversion, "OpenGL ES %d.%d", &glversion_major, &glversion_minor);
         if( glversion_major <= 2)
             VAOSupported = 0;
     }
-#endif
     if(!strncmp(glslversion, "OpenGL ES GLSL ES", 17)) {
         SDL_sscanf(glslversion, "OpenGL ES GLSL ES %d.%d", &glslversion_major, &glslversion_minor);
     }
-#ifdef __EMSCRIPTEN__
-    // EDGE even on GLES3 does not support VAO. Since hard to detect, disabled totally
-    VAOSupported = 0;
-#endif
 #endif
     
     struct VertexDataFormat vData[ 4 ];
