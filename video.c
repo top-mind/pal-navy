@@ -56,9 +56,6 @@ static BOOL bScaleScreen = PAL_SCALE_SCREEN;
 static WORD               g_wShakeTime       = 0;
 static WORD               g_wShakeLevel      = 0;
 
-#if PAL_HAS_GLSL
-#include "video_glsl.h"
-#endif
 
 void VIDEO_SetupTouchArea(int window_w, int window_h, int draw_w, int draw_h)
 {
@@ -151,14 +148,6 @@ VIDEO_Startup(
    gRenderBackend.CreateTexture = VIDEO_CreateTexture;
    gRenderBackend.RenderCopy = VIDEO_RenderCopy;
 
-#if PAL_HAS_GLSL
-   if( gConfig.fEnableGLSL) {
-	   gRenderBackend.Init = VIDEO_GLSL_Init;
-	   gRenderBackend.Setup = VIDEO_GLSL_Setup;
-	   gRenderBackend.CreateTexture = VIDEO_GLSL_CreateTexture;
-	   gRenderBackend.RenderCopy = VIDEO_GLSL_RenderCopy;
-   }
-#endif
 	
    gRenderBackend.Init();
 
@@ -243,21 +232,6 @@ VIDEO_Startup(
          SDL_FreeSurface(overlay);
       }
    }
-# if PAL_HAS_GLSL
-   // notice: power of 2
-#  define PIXELS 1
-   // We need a total empty texture in case of not using touch overlay.
-   // Or GL runtime will pick the previous texture - the main screen itself
-   // and reuse it - that makes color seems overexposed
-   else if( gConfig.fEnableGLSL )
-   {
-	   BYTE pixels[4*PIXELS*PIXELS];
-	   memset(pixels, 0, sizeof(pixels));
-	   SDL_Surface *temp = SDL_CreateRGBSurfaceFrom(pixels, PIXELS, PIXELS, 32, PIXELS, 0, 0, 0, 0);
-	   gpTouchOverlay = SDL_CreateTextureFromSurface(gpRenderer, temp);
-	   SDL_FreeSurface(temp);
-   }
-# endif
 
 #if APPIMAGE
 	if(surf)
@@ -286,12 +260,6 @@ VIDEO_Shutdown(
 
 --*/
 {
-#if PAL_HAS_GLSL
-    // since gConfig is cleared already we'd to detect on side effects
-	if( gRenderBackend.Init == VIDEO_GLSL_Init ) {
-		VIDEO_GLSL_Destroy();
-	}
-#endif
 
    if (gpScreen != NULL)
    {

@@ -415,9 +415,7 @@ PAL_LoadConfig(
 				}
 				case PALCFG_MUSIC:
 				{
-					if (PAL_HAS_NATIVEMIDI && SDL_strncasecmp(value.sValue, "MIDI", slen) == 0)
-						eMusicType = MUSIC_MIDI;
-					else if (SDL_strncasecmp(value.sValue, "RIX", slen) == 0)
+					if (SDL_strncasecmp(value.sValue, "RIX", slen) == 0)
 						eMusicType = MUSIC_RIX;
 					break;
 				}
