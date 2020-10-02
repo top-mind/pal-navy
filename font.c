@@ -27,9 +27,6 @@
 #define _FONT_C
 
 #include "fontglyph.h"
-#include "fontglyph_cn.h"
-#include "fontglyph_tw.h"
-#include "fontglyph_jp.h"
 #include "ascii.h"
 
 static int _font_height = 16;
@@ -192,198 +189,11 @@ static void PAL_LoadEmbeddedFont(void)
 	_font_height = 15;
 }
 
-INT
-PAL_LoadUserFont(
-   LPCSTR      pszBdfFileName
-)
-/*++
-  Purpose:
-
-    Loads a BDF bitmap font file.
-
-  Parameters:
-
-    [IN]  pszBdfFileName - Name of BDF bitmap font file..
-
-  Return value:
-
-    0 = success, -1 = failure.
-
---*/
-{
-   char buf[4096];
-   int state = 0, fstate = 0;
-   int codepage = -1;
-   DWORD dwEncoding = 0;
-   BYTE bFontGlyph[32] = {0};
-   int iCurHeight = 0;
-   int bbw = 0, bbh = 0, bbox, bboy;
-
-   FILE *fp = UTIL_OpenFileForMode(pszBdfFileName, "r");
-
-   if (fp == NULL)
-   {
-      return -1;
-   }
-
-   _font_height = 16;
-
-   while (fgets(buf, 4096, fp) != NULL)
-   {
-      if (state == 0)
-      {
-         if (strncmp(buf, "CHARSET_REGISTRY", 16) == 0)
-         {
-            if (strcasestr(buf, "Big5") != NULL)
-            {
-               codepage = CP_BIG5;
-            }
-            else if (strcasestr(buf, "GBK") != NULL || strcasestr(buf, "GB2312") != NULL)
-            {
-               codepage = CP_GBK;
-            }
-            else if (strcasestr(buf, "ISO10646") != NULL)
-            {
-               codepage = CP_UCS;
-            }
-            //else if (strstr(buf, "JISX0208") != NULL)
-            //
-            //  codepage = CP_JISX0208;
-            //}
-            else
-            {
-               TerminateOnError("Charset of %s is %s, which is not a supported yet.",pszBdfFileName,buf);
-            }
-         }
-         else if (strncmp(buf, "ENCODING", 8) == 0)
-         {
-            dwEncoding = atoi(buf + 8);
-         }
-         else if (strncmp(buf, "SIZE", 3) == 0)
-         {
-            int bytes_consumed = 0, bytes_now;
-            int got_size;
-            BOOL got_expected = FALSE;
-            char size[10];
-            sscanf(buf + bytes_consumed, "%s%n", size, &bytes_now);
-            bytes_consumed += bytes_now;
-            while (sscanf(buf + bytes_consumed, "%d%n", &got_size, &bytes_now))
-            {
-               bytes_consumed += bytes_now;
-               if (got_size == 16 || got_size == 15)
-               {
-                  _font_height = got_size;
-                  got_expected = TRUE;
-               }
-            }
-            if (!got_expected)
-               TerminateOnError("%s not contains expected font size 15/16!", pszBdfFileName);
-         }
-         else if (strncmp(buf, "BBX", 3) == 0)
-         {
-            int bytes_consumed = 0, bytes_now;
-            char bbx[10];
-            sscanf(buf+bytes_consumed,"%s%n",bbx,&bytes_now);bytes_consumed += bytes_now;
-            sscanf(buf+bytes_consumed,"%d%n",&bbw,&bytes_now);bytes_consumed += bytes_now;
-            sscanf(buf+bytes_consumed,"%d%n",&bbh,&bytes_now);bytes_consumed += bytes_now;
-            sscanf(buf+bytes_consumed,"%d%n",&bbox,&bytes_now);bytes_consumed += bytes_now;
-            sscanf(buf+bytes_consumed,"%d%n",&bboy,&bytes_now);bytes_consumed += bytes_now;
-         }
-         else if (strncmp(buf, "BITMAP", 6) == 0)
-         {
-            state = 1;
-            iCurHeight = 0;
-            for(iCurHeight=0;iCurHeight<bboy;iCurHeight++){
-               bFontGlyph[iCurHeight * 2] = 0;
-               bFontGlyph[iCurHeight * 2 + 1] = 0;
-            }
-            memset(bFontGlyph, 0, sizeof(bFontGlyph));
-         }
-      }
-      else if (state == 1)
-      {
-         if (strncmp(buf, "ENDCHAR", 7) == 0)
-         {
-            //
-            // Replace the original fonts
-            //
-            BYTE szCp[3];
-            szCp[0] = (dwEncoding >> 8) & 0xFF;
-            szCp[1] = dwEncoding & 0xFF;
-            szCp[2] = 0;
-
-            if (codepage == CP_GBK && dwEncoding > 0xFF)
-            {
-               szCp[0] |= 0x80;
-               szCp[1] |= 0x80;
-            }
-
-            wchar_t wc[2] = { 0 };
-            PAL_MultiByteToWideCharCP(codepage, (LPCSTR)szCp, 2, wc, 1);
-            if (wc[0] != 0)
-            {
-               wchar_t w = (wc[0] >= unicode_upper_base) ? (wc[0] - unicode_upper_base + unicode_lower_top) : wc[0];
-               if (w < sizeof(unicode_font) / sizeof(unicode_font[0]))
-               {
-                  memcpy(unicode_font[w], bFontGlyph, sizeof(bFontGlyph));
-               }
-            }
-
-            state = 0;
-         }
-         else
-         {
-            if (iCurHeight < bbh )
-            {
-               WORD wCode = strtoul(buf, NULL, 16);
-               if(bbw <= 8)
-               {
-                  switch(fstate)
-                  {
-                     case 0:
-                        bFontGlyph[iCurHeight * 2] = wCode;
-                        fstate = 1;
-                        break;
-                     case 1:
-                        bFontGlyph[iCurHeight * 2+1] = wCode;
-                        fstate = 0;
-                        iCurHeight++;
-                        break;
-                  }
-               }else{
-                  bFontGlyph[iCurHeight * 2] = (wCode >> 8);
-                  bFontGlyph[iCurHeight * 2 + 1] = (wCode & 0xFF);
-                  iCurHeight++;
-               }
-            }
-         }
-      }
-   }
-
-   fclose(fp);
-   return 0;
-}
-
 int
 PAL_InitFont(
    const CONFIGURATION* cfg
 )
 {
-#define PAL_LOAD_INTERNAL_FONT(fontdata, height) \
-   { \
-      for (int i = 0; i < sizeof(fontdata) / sizeof(fontdata[0]); i++) \
-      { \
-         wchar_t w = fontdata[i].code; \
-         w = (w >= unicode_upper_base) ? (w - unicode_upper_base + unicode_lower_top) : w; \
-         if (w < sizeof(unicode_font) / sizeof(unicode_font[0])) \
-         { \
-            memcpy(unicode_font[w], fontdata[i].data, 32); \
-            font_width[w] = 32; \
-         } \
-      } \
-      _font_height = height; \
-   }
-
    if (!cfg->pszMsgFile)
    {
       PAL_LoadEmbeddedFont();
@@ -392,48 +202,6 @@ PAL_InitFont(
    if (g_TextLib.fUseISOFont)
    {
       PAL_LoadISOFont();
-   }
-
-   if (cfg->pszFontFile)
-   {
-      PAL_LoadUserFont(cfg->pszFontFile);
-   }
-   else if (_font_height != 15)
-   {
-      switch (g_TextLib.iFontFlavor)
-      {
-      case kFontFlavorAuto:
-         switch (PAL_GetCodePage())
-         {
-         case CP_GBK:
-            PAL_LOAD_INTERNAL_FONT(fontglyph_cn, 16);
-            break;
-
-         case CP_BIG5:
-            PAL_LOAD_INTERNAL_FONT(fontglyph_tw, 15);
-            break;
-
-         default:
-            break;
-         }
-         break;
-
-      case kFontFlavorSimpChin:
-         PAL_LOAD_INTERNAL_FONT(fontglyph_cn, 16);
-         break;
-
-      case kFontFlavorTradChin:
-         PAL_LOAD_INTERNAL_FONT(fontglyph_tw, 15);
-         break;
-
-      case kFontFlavorJapanese:
-         PAL_LOAD_INTERNAL_FONT(fontglyph_jp, 16);
-         break;
-
-      case kFontFlavorUnifont:
-      default:
-         break;
-      }
    }
 
    return 0;
