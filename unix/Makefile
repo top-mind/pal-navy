@@ -35,24 +35,12 @@ TEST_OBJFILES = $(TEST_CPPFILES:.cpp=.o)
 SDL_CONFIG = sdl2-config
 
 
-FLTK_INSTALLED := $(shell command -v fltk-config 2> /dev/null)
-ifdef FLTK_INSTALLED
-	FLTK_CXXFLAGS = `fltk-config --cxxflags`
-	FLTK_CFLAGS = `fltk-config --cflags`
-	FLTK_LDFLAGS = `fltk-config --ldflags`
-else
-	FLTK_CXXFLAGS = -DPAL_NO_LAUNCH_UI
-	FLTK_CFLAGS =
-	FLTK_LDFLAGS =
-endif
-
-
 CC = $(HOST)gcc
 CXX = $(HOST)g++
 override CCFLAGS += `$(SDL_CONFIG) --cflags` -D_GNU_SOURCE -g -Wall -O2 -fno-strict-aliasing $(EXTRA_CCFLAGS) $(TEST_CCFLAGS) $(GENERATED)
-CXXFLAGS = $(CCFLAGS) -std=c++11 $(FLTK_CXXFLAGS)
-CFLAGS = $(CCFLAGS) -std=gnu99 $(FLTK_CFLAGS)
-LDFLAGS = `$(SDL_CONFIG) --libs` $(FLTK_LDFLAGS) $(MIDI_LDFLAGS) -lstdc++ -lm
+CXXFLAGS = $(CCFLAGS) -std=c++11
+CFLAGS = $(CCFLAGS) -std=gnu99
+LDFLAGS = `$(SDL_CONFIG) --libs` $(MIDI_LDFLAGS) -lstdc++ -lm
 TEST_CXXFLAGS += -isystem $(GTEST_DIR)/include -I $(GTEST_DIR) -g -Wall -Wextra -pthread
 
 UNAME_S := $(shell uname -s)

@@ -212,11 +212,6 @@ typedef struct tagCONFIGURATION
 	BOOL             fEnableAviPlay;
 	BOOL             fEnableGLSL;
     BOOL             fEnableHDR;
-#if USE_RIX_EXTRA_INIT
-	uint32_t        *pExtraFMRegs;
-	uint8_t         *pExtraFMVals;
-	uint32_t         dwExtraLength;
-#endif
 } CONFIGURATION, *LPCONFIGURATION;
 
 PAL_C_LINKAGE_BEGIN

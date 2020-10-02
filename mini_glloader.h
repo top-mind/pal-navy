@@ -24,17 +24,8 @@
 #ifndef mini_glloader_h
 #define mini_glloader_h
 
-#if __IOS__
-#include <SDL_opengles.h>
-#include <SDL_opengles2.h>
-#include <OpenGLES/ES3/gl.h>
-#include <OpenGLES/ES3/glext.h>
-#define glGenVertexArrays glGenVertexArraysOES
-#define glBindVertexArray glBindVertexArrayOES
-#else
 #include <SDL_video.h>
 #include <SDL_opengl.h>
-#endif
 
 #if __IOS__ || __ANDROID__ || __EMSCRIPTEN__ || __WINRT__ || SDL_VIDEO_DRIVER_RPI
 #define GLES 1

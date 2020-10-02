@@ -23,10 +23,6 @@
 #include "main.h"
 #include <setjmp.h>
 
-#if defined(PAL_HAS_GIT_REVISION)
-# undef PAL_GIT_REVISION
-# include "generated.h"
-#endif
 
 static jmp_buf g_exit_jmp_buf;
 static int g_exit_code = 0;
@@ -60,9 +56,6 @@ PAL_Init(
 --*/
 {
    int           e;
-#if PAL_HAS_GIT_REVISION
-   UTIL_LogOutput(LOGLEVEL_DEBUG, "SDLPal build revision: %s\n", PAL_GIT_REVISION);
-#endif
 
    //
    // Initialize subsystems.
@@ -112,11 +105,7 @@ PAL_Init(
 #else
 	   "",
 #endif
-#if defined(PAL_HAS_GIT_REVISION) && defined(PAL_GIT_REVISION)
-	   " ["  PAL_GIT_REVISION "] "
-#else
 	   ""
-#endif
        ,(gConfig.fEnableGLSL && gConfig.pszShader ? gConfig.pszShader : "")
    ));
 }
@@ -462,10 +451,8 @@ main(
 
 --*/
 {
-#if !defined( __EMSCRIPTEN__ ) && !defined(__WINRT__)
    memset(gExecutablePath,0,PAL_MAX_PATH);
    strncpy(gExecutablePath, argv[0], PAL_MAX_PATH);
-#endif
 
 #if PAL_HAS_PLATFORM_STARTUP
    UTIL_Platform_Startup(argc,argv);
@@ -479,7 +466,6 @@ main(
 	   return g_exit_code;
    }
 
-#if !defined(UNIT_TEST) || defined(UNIT_TEST_GAME_INIT)
    //
    // Initialize SDL
    //
@@ -517,9 +503,7 @@ main(
    // Initialize everything
    //
    PAL_Init();
-#endif
 
-#if !defined(UNIT_TEST)
    //
    // Show the trademark screen and splash screen
    //
@@ -536,8 +520,4 @@ main(
    //
    assert(FALSE);
    return 255;
-#else
-   extern int testmain(int argc, char *argv[]);
-   return testmain(argc, argv);
-#endif
 }

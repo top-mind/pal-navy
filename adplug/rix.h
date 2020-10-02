@@ -42,9 +42,6 @@ class CrixPlayer: public CPlayer
   std::string gettype()
     { return std::string("Softstar RIX OPL Music Format"); };
 
-#if USE_RIX_EXTRA_INIT
-  void set_extra_init(uint32_t* regs, uint8_t* datas, int n);
-#endif
 
  protected:	
   typedef struct {
@@ -52,10 +49,6 @@ class CrixPlayer: public CPlayer
   } ADDT;
 
   int flag_mkf;
-#if USE_RIX_EXTRA_INIT
-  uint32_t *extra_regs;
-  uint8_t *extra_vals;
-#endif
   FILE *fp;
   int subsongs;
   uint8_t rix_buf[16384];  /* rix files' f_buffer */
@@ -69,9 +62,6 @@ class CrixPlayer: public CPlayer
   uint16_t displace[11];
   ADDT reg_bufs[18];
   uint32_t pos, length;
-#if USE_RIX_EXTRA_INIT
-  uint32_t extra_length;
-#endif
 
   static const uint8_t adflag[18];
   static const uint8_t reg_data[18];

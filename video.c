@@ -71,9 +71,6 @@ void VIDEO_SetupTouchArea(int window_w, int window_h, int draw_w, int draw_h)
 	gOverlayRect.y = (window_h - draw_h) / 2;
 	gOverlayRect.w = draw_w;
 	gOverlayRect.h = draw_h;
-#if PAL_HAS_TOUCH
-	PAL_SetTouchBounds(window_w, window_h, gOverlayRect);
-#endif
 }
 
 #define SDL_SoftStretch SDL_UpperBlit
@@ -199,10 +196,6 @@ VIDEO_Startup(
       return -1;
    }
 
-#if defined (__IOS__)
-   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-   SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, 1);
-#endif
 
    //
    // Create the screen buffer and the backup screen buffer.

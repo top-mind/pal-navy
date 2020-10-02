@@ -29,9 +29,6 @@
 #include "resampler.h"
 #include <stdint.h>
 
-#if !defined(PAL_HAS_TOUCH)
-#define PAL_HAS_TOUCH     0
-#endif
 
 #define MAKE_BOOLEAN(defv, minv, maxv)  { .bValue = defv }, { .bValue = minv }, { .bValue = maxv }
 #define MAKE_INTEGER(defv, minv, maxv)  { .iValue = defv }, { .iValue = minv }, { .iValue = maxv }
@@ -45,7 +42,7 @@ static const ConfigItem gConfigItems[PALCFG_ALL_MAX] = {
 	{ PALCFG_STEREO,            PALCFG_BOOLEAN,  "Stereo",             6, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },                  // Default for stereo audio
 	{ PALCFG_USESURROUNDOPL,    PALCFG_BOOLEAN,  "UseSurroundOPL",    14, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },                  // Default for using surround opl
 	{ PALCFG_ENABLEKEYREPEAT,   PALCFG_BOOLEAN,  "EnableKeyRepeat",   15, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
-	{ PALCFG_USETOUCHOVERLAY,   PALCFG_BOOLEAN,  "UseTouchOverlay",   15, MAKE_BOOLEAN(PAL_HAS_TOUCH,                 FALSE,                 TRUE) },
+	{ PALCFG_USETOUCHOVERLAY,   PALCFG_BOOLEAN,  "UseTouchOverlay",   15, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
 	{ PALCFG_ENABLEAVIPLAY,     PALCFG_BOOLEAN,  "EnableAviPlay",     13, MAKE_BOOLEAN(TRUE,                          FALSE,                 TRUE) },
 	{ PALCFG_ENABLEGLSL,        PALCFG_BOOLEAN,  "EnableGLSL",        10, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
     { PALCFG_ENABLEHDR,         PALCFG_BOOLEAN,  "EnableHDR",          9, MAKE_BOOLEAN(FALSE,                         FALSE,                 TRUE) },
@@ -267,11 +264,6 @@ PAL_FreeConfig(
 )
 {
 
-#if USE_RIX_EXTRA_INIT
-	free(gConfig.pExtraFMRegs);
-	free(gConfig.pExtraFMVals);
-	free(gConfig.dwExtraLength);
-#endif
 	free(gConfig.pszMsgFile);
 	free(gConfig.pszFontFile);
 	free(gConfig.pszGamePath);
@@ -451,45 +443,6 @@ PAL_LoadConfig(
 				}
 				case PALCFG_RIXEXTRAINIT:
 				{
-#if USE_RIX_EXTRA_INIT
-					int n = 1;
-					char *p;
-					for (p = ptr; *p < *end; p++)
-					{
-						if (*p == ',')
-							n++;
-					}
-					n &= ~0x1;
-
-					if (n > 0)
-					{
-						uint32_t *regs = malloc(sizeof(uint32_t) * (n >> 1));
-						uint8_t *vals = malloc(sizeof(uint8_t) * (n >> 1));
-						uint32_t d, i, v = 1;
-						if (regs && vals)
-						{
-							for (p = ptr, i = 0; *p < *end; p++, i++)
-							{
-								if (sscanf(p, "%u", &regs[i]) == 0) { v = 0; break; }
-								while (*p < *end && *p != ',') p++; p++;
-								if (sscanf(p, "%u", &d) == 0) { v = 0; break; }
-								while (*p < *end && *p != ',') p++;
-								vals[i] = (uint8_t)d;
-							}
-							if (v)
-							{
-								gConfig.pExtraFMRegs = regs;
-								gConfig.pExtraFMVals = vals;
-								gConfig.dwExtraLength = n >> 1;
-							}
-							else
-							{
-								free(regs);
-								free(vals);
-							}
-						}
-					}
-#endif
 					break;
 				}
 				case PALCFG_MIDICLIENT:

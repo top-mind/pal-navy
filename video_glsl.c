@@ -442,11 +442,7 @@ void setupShaderParams(int pass){
 }
 
 GLint get_gl_clamp_to_border() {
-#ifdef __IOS__
-    return GL_CLAMP_TO_EDGE;
-#else
     return GL_CLAMP_TO_BORDER;
-#endif
 }
 
 GLint get_gl_wrap_mode(enum wrap_mode mode, enum scale_type type) {
@@ -1090,7 +1086,6 @@ void VIDEO_GLSL_Setup() {
     }
     Filter_StepParamSlot(0);
 
-#if !__IOS__
     // in case of GL2/GLES2(except iOS), the LACK of the belowing snippit makes keepaspectratio a mess.
     // Unsure what happened.
     if( glversion_major <= 2 ) {
@@ -1101,7 +1096,6 @@ void VIDEO_GLSL_Setup() {
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, gEBOId );
         setupShaderParams(id);
     }
-#endif
     
     if(VAOSupported) glBindVertexArray(0);
 
