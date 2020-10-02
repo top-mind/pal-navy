@@ -45,9 +45,7 @@ typedef struct tagAUDIODEVICE
    AUDIOPLAYER              *pCDPlayer;
    AUDIOPLAYER              *pSoundPlayer;
    void                     *pSoundBuffer;	/* The output buffer for sound */
-#if SDL_VERSION_ATLEAST(2,0,0)
    SDL_AudioDeviceID         id;
-#endif
    INT                       iMusicVolume;	/* The BGM volume ranged in [0, 128] for better performance */
    INT                       iSoundVolume;	/* The sound effect volume ranged in [0, 128] for better performance */
    BOOL                      fMusicEnabled; /* Is BGM enabled? */
@@ -57,12 +55,10 @@ typedef struct tagAUDIODEVICE
 
 static AUDIODEVICE gAudioDevice;
 
-#if SDL_VERSION_ATLEAST(2,0,0)
 # define SDL_CloseAudio() SDL_CloseAudioDevice(gAudioDevice.id)
 # define SDL_PauseAudio(pause_on) SDL_PauseAudioDevice(gAudioDevice.id, (pause_on))
 # define SDL_OpenAudio(desired, obtained) \
 	((gAudioDevice.id = SDL_OpenAudioDevice((gConfig.iAudioDevice >= 0 ? SDL_GetAudioDeviceName(gConfig.iAudioDevice, 0) : NULL), 0, (desired), (obtained), 0)) > 0 ? gAudioDevice.id : -1)
-#endif
 
 PAL_FORCE_INLINE
 void
@@ -225,7 +221,6 @@ AUDIO_OpenDevice(
    //
    resampler_init();
 
-#if SDL_VERSION_ATLEAST(2,0,0)
     for( int i = 0; i<SDL_GetNumAudioDrivers();i++)
     {
         UTIL_LogOutput(LOGLEVEL_VERBOSE, "Available audio driver %d:%s\n", i, SDL_GetAudioDriver(i));
@@ -243,7 +238,6 @@ AUDIO_OpenDevice(
         UTIL_LogOutput(LOGLEVEL_VERBOSE, "Available audio device %d:%s\n", i, SDL_GetAudioDeviceName(i,0));
     }
     UTIL_LogOutput(LOGLEVEL_VERBOSE, "OpenAudio: requesting audio device: %s\n",(gConfig.iAudioDevice >= 0 ? SDL_GetAudioDeviceName(gConfig.iAudioDevice, 0) : "default"));
-#endif
 
    //
    // Open the audio device.
@@ -602,11 +596,7 @@ AUDIO_Lock(
 	void
 )
 {
-#if SDL_VERSION_ATLEAST(2,0,0)
 	SDL_LockAudioDevice(gAudioDevice.id);
-#else
-	SDL_LockAudio();
-#endif
 }
 
 void
@@ -614,9 +604,5 @@ AUDIO_Unlock(
 	void
 )
 {
-#if SDL_VERSION_ATLEAST(2,0,0)
 	SDL_UnlockAudioDevice(gAudioDevice.id);
-#else
-	SDL_UnlockAudio();
-#endif
 }

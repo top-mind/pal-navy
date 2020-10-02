@@ -285,7 +285,6 @@ PAL_C_LINKAGE_END
       SDL_Delay(1); \
    }
 
-#if SDL_VERSION_ATLEAST(2,0,0)
 #define PAL_DelayUntilPC(t) \
    PAL_ProcessEvent(); \
    while (SDL_GetPerformanceCounter() < (t)) \
@@ -293,10 +292,5 @@ PAL_C_LINKAGE_END
       PAL_ProcessEvent(); \
       SDL_Delay(1); \
    }
-#else
-#define SDL_GetPerformanceFrequency() (1000)
-#define SDL_GetPerformanceCounter SDL_GetTicks
-#define PAL_DelayUntilPC PAL_DelayUntil
-#endif
 
 #endif // _PALUTILS_H
