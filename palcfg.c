@@ -419,24 +419,12 @@ PAL_LoadConfig(
 					break;
 				case PALCFG_CD:
 				{
-					if (PAL_HAS_MP3 && SDL_strncasecmp(value.sValue, "MP3", slen) == 0)
-						eCDType = CD_MP3;
-					else if (PAL_HAS_OGG && SDL_strncasecmp(value.sValue, "OGG", slen) == 0)
-						eCDType = CD_OGG;
-					else if (PAL_HAS_OPUS && SDL_strncasecmp(value.sValue, "OPUS", slen) == 0)
-						eCDType = CD_OPUS;
 					break;
 				}
 				case PALCFG_MUSIC:
 				{
 					if (PAL_HAS_NATIVEMIDI && SDL_strncasecmp(value.sValue, "MIDI", slen) == 0)
 						eMusicType = MUSIC_MIDI;
-					else if (PAL_HAS_MP3 && SDL_strncasecmp(value.sValue, "MP3", slen) == 0)
-						eMusicType = MUSIC_MP3;
-					else if (PAL_HAS_OGG && SDL_strncasecmp(value.sValue, "OGG", slen) == 0)
-						eMusicType = MUSIC_OGG;
-					else if (PAL_HAS_OPUS && SDL_strncasecmp(value.sValue, "OPUS", slen) == 0)
-						eMusicType = MUSIC_OPUS;
 					else if (SDL_strncasecmp(value.sValue, "RIX", slen) == 0)
 						eMusicType = MUSIC_RIX;
 					break;
