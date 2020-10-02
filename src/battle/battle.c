@@ -53,7 +53,6 @@ PAL_BattleMakeScene(
    int          i,j;
    PAL_POS      pos;
    LPBYTE       pSrc, pDst;
-   BYTE         b;
    INT          enemyDrawSeq[MAX_ENEMIES_IN_TEAM];
    BYTE         shifttable[256];
 

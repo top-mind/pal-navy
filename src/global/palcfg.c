@@ -376,7 +376,7 @@ PAL_LoadConfig(
 		{
 			ConfigValue value;
 			const ConfigItem * item;
-			int slen;
+			int slen = 0;
 			if (PAL_ParseConfigLine(buf, &item, &value, &slen))
 			{
 				switch (item->Item)

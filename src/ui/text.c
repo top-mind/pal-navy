@@ -1502,14 +1502,15 @@ TEXT_DisplayText(
             //
             // Set the font color to Yellow
             //
-            if(!isDialog)
-            if (g_TextLib.bCurrentFontColor == FONT_COLOR_YELLOW)
-            {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
-            }
-            else
-            {
-               g_TextLib.bCurrentFontColor = FONT_COLOR_YELLOW;
+            if(!isDialog) {
+              if (g_TextLib.bCurrentFontColor == FONT_COLOR_YELLOW)
+              {
+                g_TextLib.bCurrentFontColor = FONT_COLOR_DEFAULT;
+              }
+              else
+              {
+                g_TextLib.bCurrentFontColor = FONT_COLOR_YELLOW;
+              }
             }
             lpszText++;
             break;

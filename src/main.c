@@ -452,7 +452,7 @@ main(
 --*/
 {
    memset(gExecutablePath,0,PAL_MAX_PATH);
-   strncpy(gExecutablePath, argv[0], PAL_MAX_PATH);
+   strncpy(gExecutablePath, argv[0], PAL_MAX_PATH -1);
 
 
    if (setjmp(g_exit_jmp_buf) != 0)
