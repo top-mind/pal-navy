@@ -757,45 +757,6 @@ UTIL_CheckResourceFiles(
 }
 
 
-#if !defined(PAL_HAS_PLATFORM_SPECIFIC_UTILS)
-
-BOOL
-UTIL_GetScreenSize(
-   DWORD *pdwScreenWidth,
-   DWORD *pdwScreenHeight
-)
-{
-   return FALSE;
-}
-
-BOOL
-UTIL_IsAbsolutePath(
-	LPCSTR  lpszFileName
-)
-{
-	return FALSE;
-}
-
-INT
-UTIL_Platform_Init(
-   int argc,
-   char* argv[]
-)
-{
-   gConfig.fLaunchSetting = FALSE;
-   return 0;
-}
-
-VOID
-UTIL_Platform_Quit(
-   VOID
-)
-{
-}
-
-#endif
-
-
 /*
 * Logging utilities
 */
