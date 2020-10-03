@@ -26,8 +26,15 @@
 
 #define _FONT_C
 
-#include "fontglyph.h"
 #include "ascii.h"
+
+#define NR_UNICODE_FONT 57086
+static unsigned char (*unicode_font)[32] = NULL;
+static unsigned char *font_width = NULL;
+
+static const int unicode_lower_top  = 0xd800;
+static const int unicode_upper_base = 0xf900;
+static const int unicode_upper_top  = 65534;
 
 static int _font_height = 16;
 
@@ -194,6 +201,11 @@ PAL_InitFont(
    const CONFIGURATION* cfg
 )
 {
+   unicode_font = malloc(NR_UNICODE_FONT * 32);
+   assert(unicode_font);
+   font_width = malloc(NR_UNICODE_FONT);
+   assert(font_width);
+
    if (!cfg->pszMsgFile)
    {
       PAL_LoadEmbeddedFont();
