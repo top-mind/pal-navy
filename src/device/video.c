@@ -44,10 +44,6 @@ static BOOL bScaleScreen = PAL_SCALE_SCREEN;
 static WORD               g_wShakeTime       = 0;
 static WORD               g_wShakeLevel      = 0;
 
-
-
-void NullFunc() {}
-
 INT
 VIDEO_Startup(
    VOID
@@ -399,95 +395,6 @@ VIDEO_GetPalette(
 }
 
 VOID
-VIDEO_ToggleFullscreen(
-   VOID
-)
-/*++
-  Purpose:
-
-    Toggle fullscreen mode.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-#ifndef __NAVY__
-   DWORD                    flags;
-   PAL_LARGE SDL_Color      palette[256];
-   int                      i, bpp;
-
-   //
-   // Get the original palette.
-   //
-   if (gpScreenReal->format->palette != NULL)
-   {
-      for (i = 0; i < gpScreenReal->format->palette->ncolors; i++)
-      {
-         palette[i] = gpScreenReal->format->palette->colors[i];
-      }
-   }
-
-   //
-   // Get the flags and bpp of the original screen surface
-   //
-   flags = gpScreenReal->flags;
-   bpp = gpScreenReal->format->BitsPerPixel;
-
-   if (flags & SDL_FULLSCREEN)
-   {
-      //
-      // Already in fullscreen mode. Remove the fullscreen flag.
-      //
-      flags &= ~SDL_FULLSCREEN;
-      flags |= SDL_RESIZABLE;
-      SDL_ShowCursor(TRUE);
-   }
-   else
-   {
-      //
-      // Not in fullscreen mode. Set the fullscreen flag.
-      //
-      flags |= SDL_FULLSCREEN;
-      SDL_ShowCursor(FALSE);
-   }
-
-   //
-   // Free the original screen surface
-   //
-   SDL_FreeSurface(gpScreenReal);
-
-   //
-   // ... and create a new one
-   //
-   if (gConfig.dwScreenWidth == 640 && gConfig.dwScreenHeight == 400 && (flags & SDL_FULLSCREEN))
-   {
-      gpScreenReal = SDL_SetVideoMode(640, 480, bpp, flags);
-   }
-   else if (gConfig.dwScreenWidth == 640 && gConfig.dwScreenHeight == 480 && !(flags & SDL_FULLSCREEN))
-   {
-      gpScreenReal = SDL_SetVideoMode(640, 400, bpp, flags);
-   }
-   else
-   {
-      gpScreenReal = SDL_SetVideoMode(gConfig.dwScreenWidth, gConfig.dwScreenHeight, bpp, flags);
-   }
-
-   VIDEO_SetPalette(palette);
-
-   //
-   // Update the screen
-   //
-   VIDEO_UpdateScreen(NULL);
-#endif
-}
-
-VOID
 VIDEO_ChangeDepth(
    INT             bpp
 )
@@ -536,40 +443,6 @@ VIDEO_ChangeDepth(
    }
 
    gpPalette = gpScreenReal->format->palette;
-}
-
-VOID
-VIDEO_SaveScreenshot(
-   VOID
-)
-/*++
-  Purpose:
-
-    Save the screenshot of current screen to a BMP file.
-
-  Parameters:
-
-    None.
-
-  Return value:
-
-    None.
-
---*/
-{
-#ifndef __NAVY__
-	char filename[32];
-	struct timeval tv;
-	struct tm *ptm;
-	gettimeofday(&tv, NULL);
-	ptm = localtime(&tv.tv_sec);
-	sprintf(filename, "%04d%02d%02d%02d%02d%02d%03d.bmp", ptm->tm_year + 1900, ptm->tm_mon, ptm->tm_mday, ptm->tm_hour, ptm->tm_min, ptm->tm_sec, (int)(tv.tv_usec / 1000));
-
-	//
-	// Save the screenshot.
-	//
-	SDL_SaveBMP(gpScreenReal, PAL_CombinePath(0, gConfig.pszSavePath, filename));
-#endif
 }
 
 VOID

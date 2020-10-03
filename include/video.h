@@ -72,18 +72,8 @@ VIDEO_GetPalette(
 );
 
 VOID
-VIDEO_ToggleFullscreen(
-   VOID
-);
-
-VOID
 VIDEO_ChangeDepth(
    INT             bpp
-);
-
-VOID
-VIDEO_SaveScreenshot(
-   VOID
 );
 
 VOID
