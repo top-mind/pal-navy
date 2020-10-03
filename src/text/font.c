@@ -224,6 +224,14 @@ PAL_FreeFont(
 	void
 )
 {
+   if (unicode_font) {
+     free(unicode_font);
+     unicode_font = NULL;
+   }
+   if (font_width) {
+     free(font_width);
+     font_width = NULL;
+   }
 }
 
 void
