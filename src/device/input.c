@@ -25,7 +25,6 @@
 
 volatile PALINPUTSTATE   g_InputState;
 
-#if !SDL_VERSION_ATLEAST(2,0,0)
 # define SDLK_KP_1     SDLK_KP1
 # define SDLK_KP_2     SDLK_KP2
 # define SDLK_KP_3     SDLK_KP3
@@ -40,7 +39,6 @@ volatile PALINPUTSTATE   g_InputState;
 # define SDL_JoystickNameForIndex    SDL_JoystickName
 # define SDL_GetKeyboardState        SDL_GetKeyState
 # define SDL_GetScancodeFromKey(x)   (x)
-#endif
 
 static int _default_input_event_filter(const SDL_Event *event, volatile PALINPUTSTATE *state) { return 0; }
 
@@ -393,33 +391,12 @@ PAL_EventFilter(
 {
    switch (lpEvent->type)
    {
-#if SDL_VERSION_ATLEAST(2,0,0)
-   case SDL_WINDOWEVENT:
-      if (lpEvent->window.event == SDL_WINDOWEVENT_RESIZED)
-      {
-         //
-         // resized the window
-         //
-         VIDEO_Resize(lpEvent->window.data1, lpEvent->window.data2);
-      }
-      break;
-
-   case SDL_APP_WILLENTERBACKGROUND:
-      g_bRenderPaused = TRUE;
-      break;
-
-   case SDL_APP_DIDENTERFOREGROUND:
-      g_bRenderPaused = FALSE;
-      VIDEO_UpdateScreen(NULL);
-      break;
-#else
    case SDL_VIDEORESIZE:
       //
       // resized the window
       //
       VIDEO_Resize(lpEvent->resize.w, lpEvent->resize.h);
       break;
-#endif
 
    case SDL_QUIT:
       //
