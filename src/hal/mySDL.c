@@ -9,11 +9,6 @@
 #define W 320
 #define H 200
 
-uint8_t *SDL_GetKeyState(int *numkeys) {
-  assert(0);
-  return NULL;
-}
-
 void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor, int ncolors) {
   assert(s);
   assert(s->format);

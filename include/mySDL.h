@@ -13,7 +13,6 @@ typedef int SDL_AudioDeviceID;
 
 #define SDL_MUSTLOCK(screen) 0
 
-uint8_t *SDL_GetKeyState(int *numkeys);
 void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor, int ncolors);
 int SDL_Init(uint32_t flags);
 void SDL_Quit(void);
