@@ -12,7 +12,7 @@ CC  = gcc
 CXX = g++
 LD  = g++
 INCLUDES  = $(addprefix -I, $(INC_DIR))
-CFLAGS   += -O2 -MMD -Wall $(INCLUDES) `sdl2-config --cflags`
+CFLAGS   += -O2 -MMD -Wall $(INCLUDES) `sdl-config --cflags`
 CXXFLAGS += $(CFLAGS)
 
 # Files to be compiled
@@ -42,7 +42,7 @@ app: $(BINARY)
 
 $(BINARY): $(OBJS)
 	@echo + LD $@
-	@$(LD) -O2 -o $@ $^ `sdl2-config --libs`
+	@$(LD) -O2 -o $@ $^ `sdl-config --libs`
 
 run: app
 	ln -sf ../data $(BUILD_DIR)/

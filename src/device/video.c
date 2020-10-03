@@ -31,6 +31,7 @@ SDL_Surface              *gpScreenBak        = NULL;
 // The global palette
 static SDL_Palette       *gpPalette          = NULL;
 
+#if SDL_VERSION_ATLEAST(2,0,0)
 SDL_Window               *gpWindow           = NULL;
 SDL_Renderer      *gpRenderer         = NULL;
 SDL_Texture       *gpTexture          = NULL;
@@ -44,6 +45,9 @@ static struct RenderBackend {
     SDL_Texture *(*CreateTexture)(int width, int height);
     void (*RenderCopy)();
 } gRenderBackend;
+#else
+#undef PAL_HAS_GLSL
+#endif
 
 // The real screen surface
 SDL_Surface       *gpScreenReal       = NULL;
@@ -57,7 +61,8 @@ static WORD               g_wShakeTime       = 0;
 static WORD               g_wShakeLevel      = 0;
 
 
-static inline void VIDEO_SetupTouchArea(int window_w, int window_h, int draw_w, int draw_h)
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+void VIDEO_SetupTouchArea(int window_w, int window_h, int draw_w, int draw_h)
 {
 	gOverlayRect.x = (window_w - draw_w) / 2;
 	gOverlayRect.y = (window_h - draw_h) / 2;
@@ -112,6 +117,7 @@ static SDL_Texture *VIDEO_CreateTexture(int width, int height)
 	//
 	return SDL_CreateTexture(gpRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, texture_width, texture_height);
 }
+#endif
 
 void NullFunc() {}
 
@@ -137,6 +143,7 @@ VIDEO_Startup(
 {
 	extern char *dirname(char *path);
 
+#if SDL_VERSION_ATLEAST(2,0,0)
    int render_w, render_h;
 
    gRenderBackend.Init = NullFunc;
@@ -222,6 +229,84 @@ VIDEO_Startup(
          SDL_FreeSurface(overlay);
       }
    }
+# if PAL_HAS_GLSL
+   // notice: power of 2
+#  define PIXELS 1
+   // We need a total empty texture in case of not using touch overlay.
+   // Or GL runtime will pick the previous texture - the main screen itself
+   // and reuse it - that makes color seems overexposed
+   else if( gConfig.fEnableGLSL )
+   {
+	   BYTE pixels[4*PIXELS*PIXELS];
+	   memset(pixels, 0, sizeof(pixels));
+	   SDL_Surface *temp = SDL_CreateRGBSurfaceFrom(pixels, PIXELS, PIXELS, 32, PIXELS, 0, 0, 0, 0);
+	   gpTouchOverlay = SDL_CreateTextureFromSurface(gpRenderer, temp);
+	   SDL_FreeSurface(temp);
+   }
+# endif
+#else
+
+# if APPIMAGE
+	if(surf){
+		SDL_WM_SetIcon(surf, NULL);
+	}
+# endif
+
+   //
+   // Create the screen surface.
+   //
+   gpScreenReal = SDL_SetVideoMode(gConfig.dwScreenWidth, gConfig.dwScreenHeight, 8, PAL_VIDEO_INIT_FLAGS);
+
+   if (gpScreenReal == NULL)
+   {
+      //
+      // Fall back to 640x480 software mode.
+      //
+      gpScreenReal = SDL_SetVideoMode(640, 480, 8,
+         SDL_SWSURFACE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0));
+   }
+
+   //
+   // Still fail?
+   //
+   if (gpScreenReal == NULL)
+   {
+      return -1;
+   }
+
+   gpPalette = gpScreenReal->format->palette;
+
+   //
+   // Create the screen buffer and the backup screen buffer.
+   //
+   gpScreen = SDL_CreateRGBSurface(gpScreenReal->flags & ~SDL_HWSURFACE, 320, 200, 8,
+      gpScreenReal->format->Rmask, gpScreenReal->format->Gmask,
+      gpScreenReal->format->Bmask, gpScreenReal->format->Amask);
+
+   gpScreenBak = SDL_CreateRGBSurface(gpScreenReal->flags & ~SDL_HWSURFACE, 320, 200, 8,
+      gpScreenReal->format->Rmask, gpScreenReal->format->Gmask,
+      gpScreenReal->format->Bmask, gpScreenReal->format->Amask);
+
+   //
+   // Failed?
+   //
+   if (gpScreen == NULL || gpScreenBak == NULL)
+   {
+      VIDEO_Shutdown();
+      return -2;
+   }
+
+   if (gConfig.fFullScreen)
+   {
+      SDL_ShowCursor(FALSE);
+   }
+
+#endif
+
+#if APPIMAGE
+	if(surf)
+		SDL_FreeSurface(surf);
+#endif
 
    return 0;
 }
@@ -258,6 +343,7 @@ VIDEO_Shutdown(
    }
    gpScreenBak = NULL;
 
+#if SDL_VERSION_ATLEAST(2,0,0)
 
    if (gpTouchOverlay)
    {
@@ -287,6 +373,7 @@ VIDEO_Shutdown(
    {
       SDL_FreePalette(gpPalette);
    }
+#endif
    gpPalette = NULL;
 
    if (gpScreenReal != NULL)
@@ -296,6 +383,7 @@ VIDEO_Shutdown(
    gpScreenReal = NULL;
 }
 
+#if SDL_VERSION_ATLEAST(2,0,0)
 VOID
 VIDEO_RenderCopy(
    VOID
@@ -327,6 +415,7 @@ VIDEO_RenderCopy(
 	}
 	SDL_RenderPresent(gpRenderer);
 }
+#endif
 
 VOID
 VIDEO_UpdateScreen(
@@ -352,10 +441,12 @@ VIDEO_UpdateScreen(
    short           screenRealHeight = gpScreenReal->h;
    short           screenRealY = 0;
 
+#if SDL_VERSION_ATLEAST(2,0,0)
    if (g_bRenderPaused)
    {
 	   return;
    }
+#endif
 
    //
    // Lock surface if needed
@@ -432,7 +523,11 @@ VIDEO_UpdateScreen(
       SDL_SoftStretch(gpScreen, NULL, gpScreenReal, &dstrect);
    }
 
+#if SDL_VERSION_ATLEAST(2,0,0)
    gRenderBackend.RenderCopy();
+#else
+   SDL_UpdateRect(gpScreenReal, dstrect.x, dstrect.y, dstrect.w, dstrect.h);
+#endif
 
    if (SDL_MUSTLOCK(gpScreenReal))
    {
@@ -459,6 +554,7 @@ VIDEO_SetPalette(
 
 --*/
 {
+#if SDL_VERSION_ATLEAST(2,0,0)
    SDL_Rect rect;
 
    SDL_SetPaletteColors(gpPalette, rgPalette, 0, 256);
@@ -481,6 +577,21 @@ VIDEO_SetPalette(
    rect.h = 200;
 
    VIDEO_UpdateScreen(&rect);
+#else
+   SDL_SetPalette(gpScreen, SDL_LOGPAL | SDL_PHYSPAL, rgPalette, 0, 256);
+   SDL_SetPalette(gpScreenBak, SDL_LOGPAL | SDL_PHYSPAL, rgPalette, 0, 256);
+   SDL_SetPalette(gpScreenReal, SDL_LOGPAL | SDL_PHYSPAL, rgPalette, 0, 256);
+# if defined(PAL_FORCE_UPDATE_ON_PALETTE_SET)
+   {
+      static UINT32 time = 0;
+      if (SDL_GetTicks() - time > 50)
+      {
+	      SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+	      time = SDL_GetTicks();
+      }
+   }
+# endif
+#endif
 }
 
 VOID
@@ -505,6 +616,7 @@ VIDEO_Resize(
 
 --*/
 {
+#if SDL_VERSION_ATLEAST(2,0,0)
    SDL_Rect rect;
 
    if (gpTexture)
@@ -525,6 +637,45 @@ VIDEO_Resize(
    rect.h = 200;
 
    VIDEO_UpdateScreen(&rect);
+#else
+   DWORD                    flags;
+   PAL_LARGE SDL_Color      palette[256];
+   int                      i, bpp;
+
+   //
+   // Get the original palette.
+   //
+   if (gpScreenReal->format->palette != NULL)
+   {
+      for (i = 0; i < gpScreenReal->format->palette->ncolors; i++)
+      {
+         palette[i] = gpScreenReal->format->palette->colors[i];
+      }
+   }
+   else i = 0;
+
+   //
+   // Create the screen surface.
+   //
+   flags = gpScreenReal->flags;
+   bpp = gpScreenReal->format->BitsPerPixel;
+
+   SDL_FreeSurface(gpScreenReal);
+   gpScreenReal = SDL_SetVideoMode(w, h, bpp, flags);
+
+   if (gpScreenReal == NULL)
+   {
+      //
+      // Fall back to software windowed mode in default size.
+      //
+      gpScreenReal = SDL_SetVideoMode(PAL_DEFAULT_WINDOW_WIDTH, PAL_DEFAULT_WINDOW_HEIGHT, bpp, SDL_SWSURFACE);
+   }
+
+   SDL_SetPalette(gpScreenReal, SDL_PHYSPAL | SDL_LOGPAL, palette, 0, i);
+   VIDEO_UpdateScreen(NULL);
+
+   gpPalette = gpScreenReal->format->palette;
+#endif
 }
 
 SDL_Color *
@@ -568,6 +719,7 @@ VIDEO_ToggleFullscreen(
 
 --*/
 {
+#if SDL_VERSION_ATLEAST(2,0,0)
 	if (gConfig.fFullScreen)
 	{
 		SDL_SetWindowFullscreen(gpWindow, 0);
@@ -578,6 +730,74 @@ VIDEO_ToggleFullscreen(
 		SDL_SetWindowFullscreen(gpWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		gConfig.fFullScreen = TRUE;
 	}
+#else
+   DWORD                    flags;
+   PAL_LARGE SDL_Color      palette[256];
+   int                      i, bpp;
+
+   //
+   // Get the original palette.
+   //
+   if (gpScreenReal->format->palette != NULL)
+   {
+      for (i = 0; i < gpScreenReal->format->palette->ncolors; i++)
+      {
+         palette[i] = gpScreenReal->format->palette->colors[i];
+      }
+   }
+
+   //
+   // Get the flags and bpp of the original screen surface
+   //
+   flags = gpScreenReal->flags;
+   bpp = gpScreenReal->format->BitsPerPixel;
+
+   if (flags & SDL_FULLSCREEN)
+   {
+      //
+      // Already in fullscreen mode. Remove the fullscreen flag.
+      //
+      flags &= ~SDL_FULLSCREEN;
+      flags |= SDL_RESIZABLE;
+      SDL_ShowCursor(TRUE);
+   }
+   else
+   {
+      //
+      // Not in fullscreen mode. Set the fullscreen flag.
+      //
+      flags |= SDL_FULLSCREEN;
+      SDL_ShowCursor(FALSE);
+   }
+
+   //
+   // Free the original screen surface
+   //
+   SDL_FreeSurface(gpScreenReal);
+
+   //
+   // ... and create a new one
+   //
+   if (gConfig.dwScreenWidth == 640 && gConfig.dwScreenHeight == 400 && (flags & SDL_FULLSCREEN))
+   {
+      gpScreenReal = SDL_SetVideoMode(640, 480, bpp, flags);
+   }
+   else if (gConfig.dwScreenWidth == 640 && gConfig.dwScreenHeight == 480 && !(flags & SDL_FULLSCREEN))
+   {
+      gpScreenReal = SDL_SetVideoMode(640, 400, bpp, flags);
+   }
+   else
+   {
+      gpScreenReal = SDL_SetVideoMode(gConfig.dwScreenWidth, gConfig.dwScreenHeight, bpp, flags);
+   }
+
+   VIDEO_SetPalette(palette);
+
+   //
+   // Update the screen
+   //
+   VIDEO_UpdateScreen(NULL);
+#endif
 }
 
 VOID
@@ -599,6 +819,38 @@ VIDEO_ChangeDepth(
 
 --*/
 {
+#if !SDL_VERSION_ATLEAST(2,0,0)
+   DWORD                    flags;
+   int                      w, h;
+
+   //
+   // Get the flags and resolution of the original screen surface
+   //
+   flags = gpScreenReal->flags;
+   w = gpScreenReal->w;
+   h = gpScreenReal->h;
+
+   //
+   // Clear the screen surface.
+   //
+   SDL_FillRect(gpScreenReal, NULL, 0);
+
+   //
+   // Create the screen surface.
+   //
+   SDL_FreeSurface(gpScreenReal);
+   gpScreenReal = SDL_SetVideoMode(w, h, (bpp == 0)?8:bpp, flags);
+
+   if (gpScreenReal == NULL)
+   {
+      //
+      // Fall back to software windowed mode in default size.
+      //
+      gpScreenReal = SDL_SetVideoMode(PAL_DEFAULT_WINDOW_WIDTH, PAL_DEFAULT_WINDOW_HEIGHT, (bpp == 0)?8:bpp, SDL_SWSURFACE);
+   }
+
+   gpPalette = gpScreenReal->format->palette;
+#endif
 }
 
 VOID
@@ -630,7 +882,11 @@ VIDEO_SaveScreenshot(
 	//
 	// Save the screenshot.
 	//
+#if SDL_VERSION_ATLEAST(2,0,0)
 	SDL_SaveBMP(gpScreen, PAL_CombinePath(0, gConfig.pszSavePath, filename));
+#else
+	SDL_SaveBMP(gpScreenReal, PAL_CombinePath(0, gConfig.pszSavePath, filename));
+#endif
 }
 
 VOID
@@ -718,7 +974,11 @@ VIDEO_SwitchScreen(
 	  }
 
       SDL_SoftStretch(gpScreenBak, NULL, gpScreenReal, &dstrect);
+#if SDL_VERSION_ATLEAST(2, 0, 0)
       gRenderBackend.RenderCopy();
+#else
+      SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+#endif
 
 	  if (SDL_MUSTLOCK(gpScreenReal))
 	  {
@@ -857,7 +1117,11 @@ VIDEO_FadeScreen(
             dstrect.h = g_wShakeLevel * screenRealHeight / gpScreen->h;
 
             SDL_FillRect(gpScreenReal, &dstrect, 0);
+#if SDL_VERSION_ATLEAST(2, 0, 0)
             gRenderBackend.RenderCopy();
+#else
+			SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+#endif
             g_wShakeTime--;
          }
          else
@@ -868,7 +1132,11 @@ VIDEO_FadeScreen(
             dstrect.h = screenRealHeight;
 
             SDL_SoftStretch(gpScreenBak, NULL, gpScreenReal, &dstrect);
+#if SDL_VERSION_ATLEAST(2, 0, 0)
             gRenderBackend.RenderCopy();
+#else
+            SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+#endif
          }
       }
    }
@@ -903,7 +1171,11 @@ VIDEO_SetWindowTitle(
 
 --*/
 {
-	SDL_SetWindowTitle(gpWindow, pszTitle);
+#if SDL_VERSION_ATLEAST(2,0,0)
+	SDL_SetWindowTitle(gpWindow, PAL_CONVERT_UTF8(pszTitle));
+#else
+	SDL_WM_SetCaption(pszTitle, NULL);
+#endif
 }
 
 SDL_Surface *
@@ -1003,7 +1275,14 @@ VIDEO_UpdateSurfacePalette(
 
 --*/
 {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 	SDL_SetSurfacePalette(pSurface, gpPalette);
+#else
+	if (gpPalette != NULL)
+	{
+		SDL_SetPalette(pSurface, SDL_PHYSPAL | SDL_LOGPAL, gpPalette->colors, 0, 256);
+	}
+#endif
 }
 
 VOID
@@ -1025,6 +1304,7 @@ VIDEO_DrawSurfaceToScreen(
 
 --*/
 {
+#if SDL_VERSION_ATLEAST(2, 0, 0)
    //
    // Draw the surface to screen.
    //
@@ -1034,4 +1314,27 @@ VIDEO_DrawSurfaceToScreen(
    }
    SDL_BlitScaled(pSurface, NULL, gpScreenReal, NULL);
    gRenderBackend.RenderCopy();
+#else
+   SDL_Surface   *pCompatSurface;
+   SDL_Rect       rect;
+
+   rect.x = rect.y = 0;
+   rect.w = pSurface->w;
+   rect.h = pSurface->h;
+
+   pCompatSurface = VIDEO_CreateCompatibleSizedSurface(gpScreenReal, &rect);
+
+   //
+   // First convert the surface to compatible format.
+   //
+   SDL_BlitSurface(pSurface, NULL, pCompatSurface, NULL);
+
+   //
+   // Draw the surface to screen.
+   //
+   SDL_SoftStretch(pCompatSurface, NULL, gpScreenReal, NULL);
+
+   SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+   SDL_FreeSurface(pCompatSurface);
+#endif
 }

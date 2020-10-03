@@ -27,8 +27,10 @@
 #include <errno.h>
 
 #include "midi.h"
+#if SDL_VERSION_ATLEAST(2, 0, 0)
 #include "SDL_video.h"
 #include "SDL_messagebox.h"
+#endif
 
 static char internal_buffer[PAL_MAX_GLOBAL_BUFFERS + 1][PAL_GLOBAL_BUFFER_SIZE];
 #define INTERNAL_BUFFER_SIZE_ARGS internal_buffer[PAL_MAX_GLOBAL_BUFFERS], PAL_GLOBAL_BUFFER_SIZE
@@ -247,6 +249,7 @@ TerminateOnError(
 
    fprintf(stderr, "\nFATAL ERROR: %s\n", string);
 
+#if SDL_VERSION_ATLEAST(2, 0, 0)
    {
 	  extern SDL_Window *gpWindow;
 	  char buffer[300];
@@ -258,6 +261,9 @@ TerminateOnError(
 	  SDL_ShowMessageBox(&mbd, &btnid);
 	  PAL_Shutdown(255);
    }
+#else
+   PAL_FATAL_OUTPUT(string);
+#endif
 
 #ifdef _DEBUG
    assert(!"TerminateOnError()"); // allows jumping to debugger
