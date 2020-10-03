@@ -24,6 +24,10 @@
 //
 
 #include "main.h"
+#include "video.h"
+#include "input.h"
+#include "text.h"
+#include "palette.h"
 #include <errno.h>
 #include <wctype.h>
 
