@@ -21,11 +21,6 @@
 //
 
 #include "main.h"
-#include <setjmp.h>
-
-
-static jmp_buf g_exit_jmp_buf;
-static int g_exit_code = 0;
 
 char gExecutablePath[PAL_MAX_PATH];
 
@@ -145,8 +140,9 @@ PAL_Shutdown(
    //
    PAL_FreeGlobals();
 
-   g_exit_code = exit_code;
-   longjmp(g_exit_jmp_buf, 1);
+   SDL_Quit();
+   UTIL_Platform_Quit();
+   exit(exit_code);
 }
 
 VOID
@@ -453,15 +449,6 @@ main(
 {
    memset(gExecutablePath,0,PAL_MAX_PATH);
    strncpy(gExecutablePath, argv[0], PAL_MAX_PATH -1);
-
-
-   if (setjmp(g_exit_jmp_buf) != 0)
-   {
-	   // A longjmp is made, should exit here
-	   SDL_Quit();
-	   UTIL_Platform_Quit();
-	   return g_exit_code;
-   }
 
    //
    // Initialize SDL
