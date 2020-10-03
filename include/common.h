@@ -44,19 +44,8 @@
 #define __WIDETEXT(quote) L##quote
 #define WIDETEXT(quote) __WIDETEXT(quote)
 
-#if !defined(fmax) || !defined(fmin)
-# include <math.h>
-#endif
-
-#include <float.h>
-
-#ifndef max
-# define max fmax
-#endif
-
-#ifndef min
-# define min fmin
-#endif
+static inline int max(int a, int b) { return (a > b ? a : b); }
+static inline int min(int a, int b) { return (a < b ? a : b); }
 
 #define SDL_TICKS_PASSED(A, B)  ((Sint32)((B) - (A)) <= 0)
 

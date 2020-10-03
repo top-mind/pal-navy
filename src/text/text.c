@@ -30,6 +30,8 @@
 #include "palette.h"
 #include <errno.h>
 #include <wctype.h>
+#include <math.h>
+#include <float.h>
 
 #define   FONT_COLOR_DEFAULT        0x4F
 #define   FONT_COLOR_YELLOW         0x2D
