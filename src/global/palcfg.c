@@ -28,7 +28,7 @@
 #include "util.h"
 #include "resampler.h"
 #include <stdint.h>
-
+#include <ctype.h>
 
 #define MAKE_BOOLEAN(defv, minv, maxv)  { .bValue = defv }, { .bValue = minv }, { .bValue = maxv }
 #define MAKE_INTEGER(defv, minv, maxv)  { .iValue = defv }, { .iValue = minv }, { .iValue = maxv }

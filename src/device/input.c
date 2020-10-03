@@ -46,30 +46,20 @@ static int (*input_event_filter)(const SDL_Event *, volatile PALINPUTSTATE *) = 
 
 static const int g_KeyMap[][2] = {
    { SDLK_UP,        kKeyUp },
-   { SDLK_KP_8,      kKeyUp },
    { SDLK_DOWN,      kKeyDown },
-   { SDLK_KP_2,      kKeyDown },
    { SDLK_LEFT,      kKeyLeft },
-   { SDLK_KP_4,      kKeyLeft },
    { SDLK_RIGHT,     kKeyRight },
-   { SDLK_KP_6,      kKeyRight },
    { SDLK_ESCAPE,    kKeyMenu },
    { SDLK_INSERT,    kKeyMenu },
    { SDLK_LALT,      kKeyMenu },
    { SDLK_RALT,      kKeyMenu },
-   { SDLK_KP_0,      kKeyMenu },
    { SDLK_RETURN,    kKeySearch },
    { SDLK_SPACE,     kKeySearch },
-   { SDLK_KP_ENTER,  kKeySearch },
    { SDLK_LCTRL,     kKeySearch },
    { SDLK_PAGEUP,    kKeyPgUp },
-   { SDLK_KP_9,      kKeyPgUp },
    { SDLK_PAGEDOWN,  kKeyPgDn },
-   { SDLK_KP_3,      kKeyPgDn },
    { SDLK_HOME,      kKeyHome },
-   { SDLK_KP_7,      kKeyHome },
    { SDLK_END,       kKeyEnd },
-   { SDLK_KP_1,      kKeyEnd },
    { SDLK_r,         kKeyRepeat },
    { SDLK_a,         kKeyAuto },
    { SDLK_d,         kKeyDefend },
@@ -254,120 +244,6 @@ PAL_UpdateKeyboardState(
    }
 }
 
-static VOID
-PAL_KeyboardEventFilter(
-   const SDL_Event       *lpEvent
-)
-/*++
-  Purpose:
-
-    Handle keyboard events.
-
-  Parameters:
-
-    [IN]  lpEvent - pointer to the event.
-
-  Return value:
-
-    None.
-
---*/
-{
-   if (lpEvent->type == SDL_KEYDOWN)
-   {
-      //
-      // Pressed a key
-      //
-      if (lpEvent->key.keysym.mod & KMOD_ALT)
-      {
-         if (lpEvent->key.keysym.sym == SDLK_RETURN)
-         {
-            //
-            // Pressed Alt+Enter (toggle fullscreen)...
-            //
-            VIDEO_ToggleFullscreen();
-            return;
-         }
-         else if (lpEvent->key.keysym.sym == SDLK_F4)
-         {
-            //
-            // Pressed Alt+F4 (Exit program)...
-            //
-            PAL_Shutdown(0);
-         }
-      }
-      else if (lpEvent->key.keysym.sym == SDLK_p)
-      {
-         VIDEO_SaveScreenshot();
-      }
-   }
-}
-
-static VOID
-PAL_MouseEventFilter(
-   const SDL_Event *lpEvent
-)
-/*++
-  Purpose:
-
-    Handle mouse events.
-
-  Parameters:
-
-    [IN]  lpEvent - pointer to the event.
-
-  Return value:
-
-    None.
-
---*/
-{
-}
-
-static VOID
-PAL_JoystickEventFilter(
-   const SDL_Event       *lpEvent
-)
-/*++
-  Purpose:
-
-    Handle joystick events.
-
-  Parameters:
-
-    [IN]  lpEvent - pointer to the event.
-
-  Return value:
-
-    None.
-
---*/
-{
-}
-
-
-
-static VOID
-PAL_TouchEventFilter(
-   const SDL_Event *lpEvent
-)
-/*++
-  Purpose:
-
-    Handle touch events.
-
-  Parameters:
-
-    [IN]  lpEvent - pointer to the event.
-
-  Return value:
-
-    None.
-
---*/
-{
-}
-
 static int SDLCALL
 PAL_EventFilter(
    const SDL_Event       *lpEvent
@@ -389,6 +265,7 @@ PAL_EventFilter(
 
 --*/
 {
+#ifndef __NAVY__
    switch (lpEvent->type)
    {
    case SDL_VIDEORESIZE:
@@ -404,11 +281,7 @@ PAL_EventFilter(
       //
       PAL_Shutdown(0);
    }
-
-   PAL_KeyboardEventFilter(lpEvent);
-   PAL_MouseEventFilter(lpEvent);
-   PAL_JoystickEventFilter(lpEvent);
-   PAL_TouchEventFilter(lpEvent);
+#endif
 
    //
    // All events are handled here; don't put anything to the internal queue

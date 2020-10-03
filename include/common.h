@@ -39,7 +39,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "SDL.h"
+#include "mySDL.h"
 
 #define __WIDETEXT(quote) L##quote
 #define WIDETEXT(quote) __WIDETEXT(quote)
@@ -109,8 +109,13 @@ typedef const WCHAR        *LPCWSTR;
 # define PAL_C_LINKAGE_END
 #endif
 
+#ifdef __NAVY__
+#define PAL_PREFIX            "/share/games/pal/"
+#else
 #define PAL_PREFIX            "./data"
-#define PAL_SAVE_PREFIX       "./data"
+#endif
+
+#define PAL_SAVE_PREFIX       PAL_PREFIX
 
 #define PAL_DEFAULT_WINDOW_WIDTH   640
 #define PAL_DEFAULT_WINDOW_HEIGHT  400
@@ -119,10 +124,15 @@ typedef const WCHAR        *LPCWSTR;
 #define SDL_strcasecmp strcasecmp
 #define SDL_setenv(a,b,c) 
 
-#  define PAL_VIDEO_INIT_FLAGS  (SDL_HWSURFACE | SDL_RESIZABLE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0))
-#  define PAL_FATAL_OUTPUT(s)   system(PAL_va(0, "beep; xmessage -center \"FATAL ERROR: %s\"", (s)))
-
-#define PAL_SDL_INIT_FLAGS	(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
+#ifdef __NAVY__
+#define PAL_VIDEO_INIT_FLAGS  (SDL_HWSURFACE)
+#define PAL_FATAL_OUTPUT(s)   printf("FATAL ERROR: %s\n", (s))
+#define PAL_SDL_INIT_FLAGS    0
+#else
+#define PAL_VIDEO_INIT_FLAGS  (SDL_HWSURFACE | SDL_RESIZABLE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0))
+#define PAL_FATAL_OUTPUT(s)   system(PAL_va(0, "beep; xmessage -center \"FATAL ERROR: %s\"", (s)))
+#define PAL_SDL_INIT_FLAGS    (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
+#endif
 
 #define PAL_PLATFORM         NULL
 #define PAL_CREDIT           NULL

@@ -61,6 +61,8 @@
 #include "riff.h"
 #include "palcfg.h"
 
+#ifndef __NAVY__
+
 # define SwapStruct32(...)
 # define SwapStructFields(...)
 
@@ -793,3 +795,16 @@ AVI_GetPlayState(
 {
 	return &gAVIPlayState;
 }
+
+#else
+void PAL_AVIInit(void) {
+}
+
+void PAL_AVIShutdown(void) {
+}
+
+BOOL PAL_PlayAVI(LPCSTR lpszPath) {
+  return TRUE;
+}
+
+#endif

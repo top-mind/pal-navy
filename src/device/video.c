@@ -68,15 +68,6 @@ VIDEO_Startup(
 
 --*/
 {
-	extern char *dirname(char *path);
-
-
-# if APPIMAGE
-	if(surf){
-		SDL_WM_SetIcon(surf, NULL);
-	}
-# endif
-
    //
    // Create the screen surface.
    //
@@ -87,8 +78,12 @@ VIDEO_Startup(
       //
       // Fall back to 640x480 software mode.
       //
+#ifdef __NAVY__
+      gpScreenReal = SDL_SetVideoMode(640, 480, 8, SDL_SWSURFACE);
+#else
       gpScreenReal = SDL_SetVideoMode(640, 480, 8,
          SDL_SWSURFACE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0));
+#endif
    }
 
    //
@@ -125,12 +120,6 @@ VIDEO_Startup(
    {
       SDL_ShowCursor(FALSE);
    }
-
-
-#if APPIMAGE
-	if(surf)
-		SDL_FreeSurface(surf);
-#endif
 
    return 0;
 }
@@ -428,6 +417,7 @@ VIDEO_ToggleFullscreen(
 
 --*/
 {
+#ifndef __NAVY__
    DWORD                    flags;
    PAL_LARGE SDL_Color      palette[256];
    int                      i, bpp;
@@ -494,6 +484,7 @@ VIDEO_ToggleFullscreen(
    // Update the screen
    //
    VIDEO_UpdateScreen(NULL);
+#endif
 }
 
 VOID
@@ -566,6 +557,7 @@ VIDEO_SaveScreenshot(
 
 --*/
 {
+#ifndef __NAVY__
 	char filename[32];
 	struct timeval tv;
 	struct tm *ptm;
@@ -577,6 +569,7 @@ VIDEO_SaveScreenshot(
 	// Save the screenshot.
 	//
 	SDL_SaveBMP(gpScreenReal, PAL_CombinePath(0, gConfig.pszSavePath, filename));
+#endif
 }
 
 VOID
@@ -924,7 +917,7 @@ VIDEO_DuplicateSurface(
 
 	if (dest)
 	{
-		VIDEO_CopySurface(pSource, pRect, dest, NULL);
+		VIDEO_CopySurface(pSource, (SDL_Rect *)pRect, dest, NULL);
 	}
 
 	return dest;

@@ -159,10 +159,12 @@ AUDIO_FillBuffer(
 	   AUDIO_MixNative((short *)stream, gAudioDevice.pSoundBuffer, len >> 1);
    }
 
+#ifndef __NAVY__
    //
    // Play sound for AVI
    //
    AVI_FillAudioBuffer(AVI_GetPlayState(), (LPBYTE)stream, len);
+#endif
 }
 
 BOOL
@@ -214,6 +216,10 @@ AUDIO_OpenDevice(
    //
    resampler_init();
 
+
+#ifdef __NAVY__
+   return -3;
+#endif
 
    //
    // Open the audio device.
