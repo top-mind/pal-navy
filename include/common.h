@@ -40,7 +40,6 @@
 #include <stdbool.h>
 
 #include "SDL.h"
-#include "SDL_endian.h"
 
 #define __WIDETEXT(quote) L##quote
 #define WIDETEXT(quote) __WIDETEXT(quote)

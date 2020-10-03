@@ -12,7 +12,7 @@ CC  = gcc
 CXX = g++
 LD  = g++
 INCLUDES  = $(addprefix -I, $(INC_DIR))
-CFLAGS   += -O2 -ggdb3 -MMD -Wall $(INCLUDES) `sdl2-config --cflags` -D_GNU_SOURCE
+CFLAGS   += -O2 -MMD -Wall $(INCLUDES) `sdl2-config --cflags`
 CXXFLAGS += $(CFLAGS)
 
 # Files to be compiled
