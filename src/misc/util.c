@@ -485,6 +485,13 @@ UTIL_CloseFile(
    }
 }
 
+static inline int myAccess(const char *pathname, int mode) {
+  FILE *fp = fopen(pathname, "r");
+  int ok = (fp != NULL);
+  assert(mode == 0);
+  fclose(fp);
+  return (ok ? 0 : -1);
+}
 
 const char *
 UTIL_GetFullPathName(
@@ -502,7 +509,7 @@ UTIL_GetFullPathName(
 	char *_base = strdup(basepath), *_sub = strdup(subpath);
 	const char *result = NULL;
 
-	if (access(UTIL_CombinePath(INTERNAL_BUFFER_SIZE_ARGS, 2, _base, _sub), 0) == 0)
+	if (myAccess(UTIL_CombinePath(INTERNAL_BUFFER_SIZE_ARGS, 2, _base, _sub), 0) == 0)
 	{
 		result = internal_buffer[PAL_MAX_GLOBAL_BUFFERS];
 	}
@@ -529,7 +536,7 @@ UTIL_GetFullPathName(
 					result = UTIL_CombinePath(INTERNAL_BUFFER_SIZE_ARGS, 2, _base, list[n]->d_name);
 					if (end)
 						result = UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, result, end + 1);
-					else if (access(result, 0) != 0)
+					else if (myAccess(result, 0) != 0)
 						result = NULL;
 				}
 				free(list[n]);
