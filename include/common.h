@@ -23,6 +23,7 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+#define ENABLE_REVISIED_BATTLE
 #ifndef ENABLE_REVISIED_BATTLE
 # define PAL_CLASSIC        1
 #endif

@@ -314,7 +314,7 @@ PAL_BattleUIIsActionValid(
 #ifndef PAL_CLASSIC
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
-         w = gpGlobals->rgParty[i].wPlayerRole;
+         WORD w = gpGlobals->rgParty[i].wPlayerRole;
 
          if (gpGlobals->g.PlayerRoles.rgwHP[w] < gpGlobals->g.PlayerRoles.rgwMaxHP[w] / 5 ||
             gpGlobals->rgPlayerStatus[w][kStatusSleep] != 0 ||
