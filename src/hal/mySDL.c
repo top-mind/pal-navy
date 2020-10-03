@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define W 320
+#define H 200
+
 uint8_t *SDL_GetKeyState(int *numkeys) {
   assert(0);
   return NULL;
@@ -39,6 +42,7 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor
 }
 
 int SDL_Init(uint32_t flags) {
+  NDL_OpenDisplay(W, H);
   return 0;
 }
 
