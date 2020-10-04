@@ -1266,7 +1266,7 @@ PAL_StartDialogWithOffset(
 
 --*/
 {
-   PAL_LARGE BYTE buf[16384];
+   PAL_LARGE BYTE*buf = malloc(16384);
    SDL_Rect       rect;
 
    if (gpGlobals->fInBattle && !g_fUpdatedInBattle)
@@ -1371,6 +1371,8 @@ PAL_StartDialogWithOffset(
    g_TextLib.posDialogText = PAL_XY( PAL_X(g_TextLib.posDialogText) + xOff, PAL_Y(g_TextLib.posDialogText) + yOff);
 
    g_TextLib.bDialogPosition = bDialogLocation;
+
+   free(buf);
 }
 
 static VOID
@@ -1392,7 +1394,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
 
 --*/
 {
-   PAL_LARGE SDL_Color   palette[256];
+   PAL_LARGE SDL_Color   *palette = malloc(sizeof(palette[0]) * 256);
    SDL_Color   *pCurrentPalette, t;
    int         i;
    uint32_t    dwBeginningTicks = SDL_GetTicks();
@@ -1401,7 +1403,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
    // get the current palette
    //
    pCurrentPalette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
-   memcpy(palette, pCurrentPalette, sizeof(palette));
+   memcpy(palette, pCurrentPalette, sizeof(palette[0]) * 256);
 
    if (g_TextLib.bDialogPosition != kDialogCenterWindow &&
       g_TextLib.bDialogPosition != kDialogCenter)
@@ -1466,6 +1468,8 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
    PAL_ClearKeyState();
 
    g_TextLib.fUserSkip = FALSE;
+
+   free(palette);
 }
 
 static VOID

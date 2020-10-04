@@ -1032,9 +1032,9 @@ PAL_PlayerStatus(
 
 --*/
 {
-   PAL_LARGE BYTE   bufBackground[320 * 200];
-   PAL_LARGE BYTE   bufImage[16384];
-   PAL_LARGE BYTE   bufImageBox[50 * 49];
+   PAL_LARGE BYTE   *bufBackground = malloc(320 * 200);
+   PAL_LARGE BYTE   *bufImage = malloc(16384);
+   PAL_LARGE BYTE   *bufImageBox = malloc(50 * 49);
    int              labels0[] = {
       STATUS_LABEL_EXP, STATUS_LABEL_LEVEL, STATUS_LABEL_HP,
       STATUS_LABEL_MP
@@ -1249,6 +1249,10 @@ PAL_PlayerStatus(
          }
       }
    }
+
+   free(bufBackground);
+   free(bufImage);
+   free(bufImageBox);
 }
 
 WORD
@@ -1272,7 +1276,7 @@ PAL_ItemUseMenu(
 --*/
 {
    BYTE           bColor, bSelectedColor;
-   PAL_LARGE BYTE bufImage[2048];
+   PAL_LARGE BYTE*bufImage = malloc(2048);
    DWORD          dwColorChangeTime;
    static WORD    wSelectedPlayer = 0;
    SDL_Rect       rect = {110, 2, 200, 180};
@@ -1457,6 +1461,8 @@ PAL_ItemUseMenu(
       }
    }
 
+   free(bufImage);
+
    return MENUITEM_VALUE_CANCELLED;
 }
 
@@ -1483,7 +1489,7 @@ PAL_BuyMenu_OnItemChange(
 {
    const SDL_Rect      rect = {20, 8, 300, 175};
    int                 i, n;
-   PAL_LARGE BYTE      bufImage[2048];
+   PAL_LARGE BYTE     *bufImage = malloc(2048);
 
    if( __buymenu_firsttime_render )
       PAL_RLEBlitToSurfaceWithShadow(PAL_SpriteGetFrame(gpSpriteUI, SPRITENUM_ITEMBOX), gpScreen, PAL_XY(35+6, 8+6), TRUE);
@@ -1542,6 +1548,8 @@ PAL_BuyMenu_OnItemChange(
    VIDEO_UpdateScreen(&rect);
    
    __buymenu_firsttime_render = FALSE;
+
+   free(bufImage);
 }
 
 VOID
@@ -1738,9 +1746,9 @@ PAL_EquipItemMenu(
 
 --*/
 {
-   PAL_LARGE BYTE   bufBackground[320 * 200];
-   PAL_LARGE BYTE   bufImageBox[72 * 72];
-   PAL_LARGE BYTE   bufImage[2048];
+   PAL_LARGE BYTE  *bufBackground = malloc(320 * 200);
+   PAL_LARGE BYTE  *bufImageBox = malloc(72 * 72);
+   PAL_LARGE BYTE  *bufImage = malloc(2048);
    WORD             w;
    int              iCurrentPlayer, i;
    BYTE             bColor, bSelectedColor;
@@ -1944,7 +1952,7 @@ PAL_EquipItemMenu(
 
       if (wItem == 0)
       {
-         return;
+         goto _return;
       }
 
       if (g_InputState.dwKeyPress & (kKeyUp | kKeyLeft))
@@ -1965,7 +1973,7 @@ PAL_EquipItemMenu(
       }
       else if (g_InputState.dwKeyPress & kKeyMenu)
       {
-         return;
+         goto _return;
       }
       else if (g_InputState.dwKeyPress & kKeySearch)
       {
@@ -1982,6 +1990,11 @@ PAL_EquipItemMenu(
          }
       }
    }
+
+_return:
+   free(bufBackground);
+   free(bufImageBox);
+   free(bufImage);
 }
 
 VOID

@@ -337,7 +337,7 @@ VIDEO_Resize(
 --*/
 {
    DWORD                    flags;
-   PAL_LARGE SDL_Color      palette[256];
+   PAL_LARGE SDL_Color     *palette = malloc(sizeof(palette[0]) * 256);
    int                      i, bpp;
 
    //
@@ -373,6 +373,8 @@ VIDEO_Resize(
    VIDEO_UpdateScreen(NULL);
 
    gpPalette = gpScreenReal->format->palette;
+
+   free(palette);
 }
 
 SDL_Color *

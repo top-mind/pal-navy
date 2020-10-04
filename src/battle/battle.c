@@ -566,7 +566,7 @@ PAL_LoadBattleBackground(
 
 --*/
 {
-   PAL_LARGE BYTE           buf[320 * 200];
+   PAL_LARGE BYTE           *buf = malloc(320 * 200);
 
    //
    // Create the surface
@@ -587,6 +587,8 @@ PAL_LoadBattleBackground(
    // Draw the picture to the surface.
    //
    PAL_FBPBlitToSurface(buf, g_Battle.lpBackground);
+
+   free(buf);
 }
 
 static VOID

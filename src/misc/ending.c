@@ -68,15 +68,15 @@ PAL_ShowFBP(
 
 --*/
 {
-   PAL_LARGE BYTE            buf[320 * 200];
-   PAL_LARGE BYTE            bufSprite[320 * 200];
+   PAL_LARGE BYTE           *buf = malloc(320 * 200);
+   PAL_LARGE BYTE           *bufSprite = malloc(320 * 200);
    const int                 rgIndex[6] = {0, 3, 1, 5, 2, 4};
    int                       i, j, k;
    BYTE                      a, b;
 
    if (PAL_MKFDecompressChunk(buf, 320 * 200, wChunkNum, gpGlobals->f.fpFBP) <= 0)
    {
-      memset(buf, 0, sizeof(buf));
+      memset(buf, 0, 320 * 200);
    }
 
    if (g_wCurEffectSprite != 0)
@@ -148,6 +148,9 @@ PAL_ShowFBP(
    }
 
    VIDEO_UpdateScreen(NULL);
+
+   free(buf);
+   free(bufSprite);
 }
 
 VOID
@@ -176,14 +179,14 @@ PAL_ScrollFBP(
 --*/
 {
    SDL_Surface          *p;
-   PAL_LARGE BYTE        buf[320 * 200];
-   PAL_LARGE BYTE        bufSprite[320 * 200];
+   PAL_LARGE BYTE           *buf = malloc(320 * 200);
+   PAL_LARGE BYTE           *bufSprite = malloc(320 * 200);
    int                   i, l;
    SDL_Rect              rect, dstrect;
 
    if (PAL_MKFDecompressChunk(buf, 320 * 200, wChunkNum, gpGlobals->f.fpFBP) <= 0)
    {
-      return;
+      goto _return;
    }
 
    if (g_wCurEffectSprite != 0)
@@ -195,7 +198,7 @@ PAL_ScrollFBP(
 
    if (p == NULL)
    {
-      return;
+      goto _return;
    }
 
    VIDEO_BackupScreen(gpScreen);
@@ -277,6 +280,10 @@ PAL_ScrollFBP(
    VIDEO_CopyEntireSurface(p, gpScreen);
    VIDEO_FreeSurface(p);
    VIDEO_UpdateScreen(NULL);
+
+_return:
+   free(buf);
+   free(bufSprite);
 }
 
 VOID

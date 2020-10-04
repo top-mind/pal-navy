@@ -45,7 +45,7 @@ PAL_GetPalette(
 --*/
 {
    static SDL_Color      palette[256];
-   PAL_LARGE BYTE        buf[1536];
+   PAL_LARGE BYTE       *buf = malloc(1536);
    INT                   i;
    FILE                 *fp;
 
@@ -63,6 +63,7 @@ PAL_GetPalette(
       //
       // Read failed
       //
+      free(buf);
       return NULL;
    }
    else if (i <= 256 * 3)
@@ -80,6 +81,7 @@ PAL_GetPalette(
       palette[i].b = buf[(fNight ? 256 * 3 : 0) + i * 3 + 2] << 2;
    }
 
+   free(buf);
    return palette;
 }
 
@@ -138,8 +140,8 @@ PAL_FadeOut(
 {
    int                      i, j;
    UINT                     time;
-   PAL_LARGE SDL_Color      palette[256];
-   PAL_LARGE SDL_Color      newpalette[256];
+   PAL_LARGE SDL_Color     *palette = malloc(sizeof(palette[0]) * 256);
+   PAL_LARGE SDL_Color     *newpalette = malloc(sizeof(newpalette[0]) * 256);
 
    //
    // Get the original palette...
@@ -177,8 +179,11 @@ PAL_FadeOut(
       UTIL_Delay(10);
    }
 
-   memset(newpalette, 0, sizeof(newpalette));
+   memset(newpalette, 0, sizeof(newpalette[0]) * 256);
    VIDEO_SetPalette(newpalette);
+
+   free(palette);
+   free(newpalette);
 }
 
 VOID
@@ -209,7 +214,7 @@ PAL_FadeIn(
    int                      i, j;
    UINT                     time;
    SDL_Color               *palette;
-   PAL_LARGE SDL_Color      newpalette[256];
+   PAL_LARGE SDL_Color     *newpalette = malloc(sizeof(newpalette[0]) * 256);
 
    //
    // Get the new palette...
@@ -246,6 +251,8 @@ PAL_FadeIn(
    }
 
    VIDEO_SetPalette(palette);
+
+   free(newpalette);
 }
 
 VOID
@@ -393,13 +400,16 @@ PAL_PaletteFade(
    int            i, j;
    UINT           time;
    SDL_Color     *newpalette = PAL_GetPalette(iPaletteNum, fNight);
-   PAL_LARGE SDL_Color      palette[256];
-   PAL_LARGE SDL_Color		t[256];
+   PAL_LARGE SDL_Color   *palette = NULL;
+   PAL_LARGE SDL_Color   *t = NULL;
 
    if (newpalette == NULL)
    {
       return;
    }
+
+   palette = malloc(sizeof(palette[0]) * 256);
+   t = malloc(sizeof(t[0]) * 256);
 
    for (i = 0; i < 256; i++)
    {
@@ -442,6 +452,9 @@ PAL_PaletteFade(
          SDL_Delay(5);
       }
    }
+
+   free(palette);
+   free(t);
 }
 
 VOID
@@ -470,7 +483,7 @@ PAL_ColorFade(
 --*/
 {
    SDL_Color       *palette;
-   PAL_LARGE SDL_Color        newpalette[256];
+   PAL_LARGE SDL_Color       *newpalette = malloc(sizeof(newpalette[0]) * 256);
    int              i, j;
 
    palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
@@ -528,7 +541,7 @@ PAL_ColorFade(
    }
    else
    {
-      memcpy(newpalette, palette, sizeof(newpalette));
+      memcpy(newpalette, palette, sizeof(newpalette[0]) * 256);
 
       for (i = 0; i < 64; i++)
       {
@@ -573,6 +586,8 @@ PAL_ColorFade(
 
       VIDEO_SetPalette(newpalette);
    }
+
+   free(newpalette);
 }
 
 VOID
@@ -595,12 +610,12 @@ PAL_FadeToRed(
 --*/
 {
    SDL_Color                 *palette;
-   PAL_LARGE SDL_Color        newpalette[256];
+   PAL_LARGE SDL_Color       *newpalette = malloc(sizeof(newpalette[0]) * 256);
    int                        i, j;
    BYTE                       color;
 
    palette = PAL_GetPalette(gpGlobals->wNumPalette, gpGlobals->fNightPalette);
-   memcpy(newpalette, palette, sizeof(newpalette));
+   memcpy(newpalette, palette, sizeof(newpalette[0]) * 256);
 
    for (i = 0; i < gpScreen->pitch * gpScreen->h; i++)
    {
@@ -646,4 +661,6 @@ PAL_FadeToRed(
       VIDEO_SetPalette(newpalette);
       UTIL_Delay(75);
    }
+
+   free(newpalette);
 }
