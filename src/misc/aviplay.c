@@ -804,7 +804,7 @@ void PAL_AVIShutdown(void) {
 }
 
 BOOL PAL_PlayAVI(LPCSTR lpszPath) {
-  return TRUE;
+  return FALSE;
 }
 
 #endif
