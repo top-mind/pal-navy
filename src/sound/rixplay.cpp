@@ -457,7 +457,7 @@ RIX_Init(
 		{
 			pRixPlayer->resampler[i] = resampler_create();
 			resampler_set_quality(pRixPlayer->resampler[i], AUDIO_IsIntegerConversion(gConfig.iOPLSampleRate) ? RESAMPLER_QUALITY_MIN : gConfig.iResampleQuality);
-			resampler_set_rate(pRixPlayer->resampler[i], (double)gConfig.iOPLSampleRate / (double)gConfig.iSampleRate);
+			resampler_set_rate(pRixPlayer->resampler[i], gConfig.iOPLSampleRate, gConfig.iSampleRate);
 		}
 	}
 

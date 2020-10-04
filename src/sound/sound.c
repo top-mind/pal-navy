@@ -823,7 +823,7 @@ SOUND_Play(
 		else
 			resampler_clear(cursnd->resampler[i]);
 		resampler_set_quality(cursnd->resampler[i], AUDIO_IsIntegerConversion(wavespec.freq) ? RESAMPLER_QUALITY_MIN : gConfig.iResampleQuality);
-		resampler_set_rate(cursnd->resampler[i], (double)wavespec.freq / (double)devspec->freq);
+		resampler_set_rate(cursnd->resampler[i], wavespec.freq, devspec->freq);
 	}
 
 	cursnd->base = buf;

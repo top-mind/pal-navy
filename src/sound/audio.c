@@ -211,10 +211,6 @@ AUDIO_OpenDevice(
    gAudioDevice.iSoundVolume = gConfig.iSoundVolume * SDL_MIX_MAXVOLUME / PAL_MAX_VOLUME;
    MIDI_SetVolume(gConfig.iMusicVolume);
 
-#ifdef __NAVY__
-   return -3;
-#endif
-
    //
    // Initialize the resampler module
    //
