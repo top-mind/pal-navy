@@ -94,7 +94,7 @@ public:
 
 protected:
    typedef __int64        Int;
-   typedef long double    Float;
+   typedef double    Float;
    typedef unsigned char  Byte; // has to be unsigned!
 
    typedef int		Flags;
