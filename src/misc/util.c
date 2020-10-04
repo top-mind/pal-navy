@@ -514,6 +514,7 @@ UTIL_GetFullPathName(
 		result = internal_buffer[PAL_MAX_GLOBAL_BUFFERS];
 	}
 
+#ifndef __NAVY__
 	if (result == NULL)
 	{
 		size_t pos = strspn(_sub, PAL_PATH_SEPARATORS);
@@ -544,6 +545,7 @@ UTIL_GetFullPathName(
 			free(list);
 		}
 	}
+#endif
 	if (result != NULL)
 	{
 		size_t dstlen = min(buflen - 1, strlen(result));

@@ -141,7 +141,6 @@ PAL_Shutdown(
    PAL_FreeGlobals();
 
    SDL_Quit();
-   UTIL_Platform_Quit();
    exit(exit_code);
 }
 
@@ -459,12 +458,6 @@ main(
    }
 
    PAL_LoadConfig(TRUE);
-
-   //
-   // Platform-specific initialization
-   //
-   if (UTIL_Platform_Init(argc, argv) != 0)
-	   return -1;
 
    //
    // If user requests a file-based log, then add it after the system-specific one.
