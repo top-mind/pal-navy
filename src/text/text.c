@@ -30,8 +30,6 @@
 #include "palette.h"
 #include <errno.h>
 #include <wctype.h>
-#include <math.h>
-#include <float.h>
 
 #define   FONT_COLOR_DEFAULT        0x4F
 #define   FONT_COLOR_YELLOW         0x2D
@@ -1377,7 +1375,7 @@ PAL_StartDialogWithOffset(
 
 static VOID
 PAL_DialogWaitForKeyWithMaximumSeconds(
-   FLOAT fMaxSeconds
+   INT   maxSeconds
 )
 /*++
   Purpose:
@@ -1448,7 +1446,7 @@ PAL_DialogWaitForKeyWithMaximumSeconds(
          VIDEO_SetPalette(palette);
       }
 
-      if (fabs(fMaxSeconds) > FLT_EPSILON && SDL_GetTicks() - dwBeginningTicks > 1000 * fMaxSeconds)
+      if (maxSeconds > 0 && SDL_GetTicks() - dwBeginningTicks > 1000 * maxSeconds)
       {
          break;
       }
@@ -1722,7 +1720,7 @@ PAL_ShowDialogText(
          TEXT_DisplayText(lpszText, PAL_X(pos) + 8 + ((len & 1) << 2), PAL_Y(pos) + 10, TRUE);
          VIDEO_UpdateScreen(&rect);
 
-         PAL_DialogWaitForKeyWithMaximumSeconds(1.4);
+         PAL_DialogWaitForKeyWithMaximumSeconds(1);
 
          //
          // Delete the box

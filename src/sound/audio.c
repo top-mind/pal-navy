@@ -404,7 +404,7 @@ VOID
 AUDIO_PlayMusic(
    INT       iNumRIX,
    BOOL      fLoop,
-   FLOAT     flFadeTime
+   INT       flFadeTime
 )
 {
 	if (iNumRIX > 0)
