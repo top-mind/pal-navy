@@ -27,19 +27,19 @@
 //
 // Set to 1 to build std::string supporting methods. You need the STL to
 // do this.
-#define BINIO_ENABLE_STRING	1
+#define BINIO_ENABLE_STRING	0
 
 // BINIO_ENABLE_IOSTREAM - Build iostream wrapper classes
 //
 // Set to 1 to build the iostream wrapper classes. You need the standard
 // C++ library to do this.
-#define BINIO_ENABLE_IOSTREAM	1
+#define BINIO_ENABLE_IOSTREAM	0
 
 // BINIO_ISO_STDLIB - Build with ISO C++ standard library compliance
 //
 // Set to 1 to build for the ISO standard C++ library (i.e. namespaces, STL and
 // templatized iostream). Set to 0 to build for the traditional C++ library.
-#define BINIO_ISO_STDLIB	1
+#define BINIO_ISO_STDLIB	0
 
 // BINIO_WITH_MATH - Build with 'math.h' dependency to allow float conversions
 //
@@ -125,7 +125,7 @@ public:
    unsigned long readString(char *str, unsigned long amount);
    unsigned long readString(char *str, unsigned long maxlen, const char delim);
 #if BINIO_ENABLE_STRING
-   std::string readString(const char delim = '\0');
+   const char * readString(const char delim = '\0');
 #endif
 
    Int peekInt(unsigned int size);
@@ -151,7 +151,7 @@ public:
    void writeFloat(Float f, FType ft);
    unsigned long writeString(const char *str, unsigned long amount = 0);
 #if BINIO_ENABLE_STRING
-   unsigned long writeString(const std::string &str);
+   unsigned long writeString(const const char * &str);
 #endif
 
 protected:

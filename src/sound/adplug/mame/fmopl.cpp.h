@@ -94,7 +94,6 @@ Revision History:
 
 #include "fmopl.h"
 #include <math.h>
-#include <algorithm>
 
 /* output final shift */
 #if (OPL_SAMPLE_BITS==16)
@@ -1089,7 +1088,8 @@ public:
 		/* allocate memory block */
 		char *ptr = reinterpret_cast<char *>(::operator new(state_size));
 
-		FM_OPL *const OPL = new(ptr) FM_OPL;
+		//FM_OPL *const OPL = new(ptr) FM_OPL;
+		FM_OPL *const OPL = reinterpret_cast<FM_OPL *>(ptr);
         memset(OPL, 0, state_size);
 
 		ptr += state_size;

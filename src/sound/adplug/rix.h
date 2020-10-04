@@ -32,15 +32,15 @@ class CrixPlayer: public CPlayer
   CrixPlayer(Copl *newopl);
   ~CrixPlayer();
 
-  bool load(const std::string &filename, const CFileProvider &fp);
+  bool load(const char * &filename, const CFileProvider &fp);
   bool update();
   void rewind(int subsong);
   void rewindReInit(int subsong, bool reinit); /* For seamless continous */
   float getrefresh();
   unsigned int getsubsongs();
 
-  std::string gettype()
-    { return std::string("Softstar RIX OPL Music Format"); };
+  const char * gettype()
+    { return "Softstar RIX OPL Music Format"; };
 
 
  protected:	

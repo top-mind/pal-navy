@@ -319,9 +319,9 @@ unsigned long binistream::readString(char *str, unsigned long maxlen,
 }
 
 #if BINIO_ENABLE_STRING
-std::string binistream::readString(const char delim) {
+const char * binistream::readString(const char delim) {
    char buf[STRINGBUFSIZE + 1];
-   std::string tempstr;
+   const char * tempstr;
    unsigned long read;
 
    do {
@@ -649,7 +649,7 @@ unsigned long binostream::writeString(const char *str, unsigned long amount) {
 }
 
 #if BINIO_ENABLE_STRING
-unsigned long binostream::writeString(const std::string &str) {
+unsigned long binostream::writeString(const const char * &str) {
    return writeString(str.c_str());
 }
 #endif

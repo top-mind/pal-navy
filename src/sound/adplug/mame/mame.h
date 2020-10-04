@@ -28,7 +28,6 @@
 #include <stdint.h>
 #include <math.h>
 #include <string.h>
-#include <algorithm>
 
 typedef void device_t;
 struct attotime {};

@@ -39,7 +39,7 @@ public:
 
    virtual void open(const char *filename, const Mode mode) = 0;
 #if BINIO_ENABLE_STRING
-   virtual void open(const std::string &filename, const Mode mode) = 0;
+   virtual void open(const const char * &filename, const Mode mode) = 0;
 #endif
    void close();
 
@@ -55,14 +55,14 @@ public:
    binifstream();
    binifstream(const char *filename, const Mode mode = NoCreate);
 #if BINIO_ENABLE_STRING
-   binifstream(const std::string &filename, const Mode mode = NoCreate);
+   binifstream(const const char * &filename, const Mode mode = NoCreate);
 #endif
 
    virtual ~binifstream();
 
    virtual void open(const char *filename, const Mode mode = NoCreate);
 #if BINIO_ENABLE_STRING
-   virtual void open(const std::string &filename, const Mode mode = NoCreate);
+   virtual void open(const const char * &filename, const Mode mode = NoCreate);
 #endif
 
 protected:
@@ -74,14 +74,14 @@ public:
    binofstream();
    binofstream(const char *filename, const Mode mode = 0);
 #if BINIO_ENABLE_STRING
-   binofstream(const std::string &filename, const Mode mode = 0);
+   binofstream(const const char * &filename, const Mode mode = 0);
 #endif
 
    virtual ~binofstream();
 
    virtual void open(const char *filename, const Mode mode = 0);
 #if BINIO_ENABLE_STRING
-   virtual void open(const std::string &filename, const Mode mode = 0);
+   virtual void open(const const char * &filename, const Mode mode = 0);
 #endif
 
 protected:
@@ -93,14 +93,14 @@ public:
    binfstream();
    binfstream(const char *filename, const Mode mode = 0);
 #if BINIO_ENABLE_STRING
-   binfstream(const std::string &filename, const Mode mode = 0);
+   binfstream(const const char * &filename, const Mode mode = 0);
 #endif
 
    virtual ~binfstream();
 
    virtual void open(const char *filename, const Mode mode = 0);
 #if BINIO_ENABLE_STRING
-   virtual void open(const std::string &filename, const Mode mode = 0);
+   virtual void open(const const char * &filename, const Mode mode = 0);
 #endif
 };
 
