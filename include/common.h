@@ -32,7 +32,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <limits.h>
 #include <stdarg.h>
 #include <assert.h>
@@ -50,9 +49,6 @@ static inline int min(int a, int b) { return (a < b ? a : b); }
 #define SDL_TICKS_PASSED(A, B)  ((Sint32)((B) - (A)) <= 0)
 
 #define PAL_FORCE_INLINE __attribute__((always_inline)) static __inline__
-
-# include <unistd.h>
-# include <dirent.h>
 
 # ifndef FALSE
 #  define FALSE               0
@@ -126,8 +122,6 @@ typedef const WCHAR        *LPCWSTR;
 #define PAL_PLATFORM         NULL
 #define PAL_CREDIT           NULL
 #define PAL_PORTYEAR         NULL
-
-#include <sys/time.h>
 
 #ifndef PAL_DEFAULT_TEXTURE_WIDTH
 # define PAL_DEFAULT_TEXTURE_WIDTH     PAL_DEFAULT_WINDOW_WIDTH

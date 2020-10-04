@@ -146,7 +146,7 @@ lrand(
 --*/
 {
    if (glSeed == 0) // if the random seed isn't initialized...
-      lsrand((unsigned int)time(NULL)); // initialize it first
+      lsrand(SDL_GetTicks()); // initialize it first
    glSeed = 1664525L * glSeed + 1013904223L; // do some twisted math (infinite suite)
    return ((glSeed >> 1) + 1073741824L); // and return the result.
 }
@@ -514,38 +514,6 @@ UTIL_GetFullPathName(
 		result = internal_buffer[PAL_MAX_GLOBAL_BUFFERS];
 	}
 
-#ifndef __NAVY__
-	if (result == NULL)
-	{
-		size_t pos = strspn(_sub, PAL_PATH_SEPARATORS);
-
-		if (pos < sublen)
-		{
-			char *start = _sub + pos;
-			char *end = strpbrk(start, PAL_PATH_SEPARATORS);
-			if (end) *end = '\0';
-
-			//
-			// try to find the matching file in the directory.
-			//
-			struct dirent **list;
-			int n = scandir(_base, &list, 0, alphasort);
-			while (n-- > 0)
-			{
-				if (!result && SDL_strcasecmp(list[n]->d_name, start) == 0)
-				{
-					result = UTIL_CombinePath(INTERNAL_BUFFER_SIZE_ARGS, 2, _base, list[n]->d_name);
-					if (end)
-						result = UTIL_GetFullPathName(INTERNAL_BUFFER_SIZE_ARGS, result, end + 1);
-					else if (myAccess(result, 0) != 0)
-						result = NULL;
-				}
-				free(list[n]);
-			}
-			free(list);
-		}
-	}
-#endif
 	if (result != NULL)
 	{
 		size_t dstlen = min(buflen - 1, strlen(result));
@@ -683,17 +651,11 @@ UTIL_LogOutput(
 )
 {
 	va_list    va;
-	time_t     tv = time(NULL);
-	struct tm *tmval = localtime(&tv);
 	int        id, n;
 
 	if (level > LOGLEVEL_MAX) level = LOGLEVEL_MAX;
 
-	snprintf(_log_buffer, PAL_LOG_BUFFER_EXTRA_SIZE,
-		"%04d-%02d-%02d %02d:%02d:%02d %s: ",
-		tmval->tm_year + 1900, tmval->tm_mon, tmval->tm_mday,
-		tmval->tm_hour, tmval->tm_min, tmval->tm_sec,
-		_loglevel_str[level]);
+	snprintf(_log_buffer, PAL_LOG_BUFFER_EXTRA_SIZE, "%s: ", _loglevel_str[level]);
 	if( strlen(_log_prelude) > 0 )
 		strncat(_log_buffer, _log_prelude, PAL_LOG_BUFFER_EXTRA_SIZE);
 
