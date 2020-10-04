@@ -25,19 +25,9 @@
 
 using namespace std;
 
-#if defined(__hppa__) || \
-   defined(__m68k__) || defined(mc68000) || defined(_M_M68K) || \
-   (defined(__MIPS__) && defined(__MISPEB__)) || \
-   defined(__ppc__) || defined(__POWERPC__) || defined(_M_PPC) || \
-   defined(__sparc__)
-   // big endian
-   #define RIX_SWAP32(a) (((a) << 24) | (((a) << 8) & 0x00FF0000) | (((a) >> 8) & 0x0000FF00) | ((a) >> 24))
-   #define RIX_SWAP16(a) ((((a) << 8) & 0xFF00)  | ((a) >> 8))
-#else
-   // little endian
-   #define RIX_SWAP32(a) (a)
-   #define RIX_SWAP16(a) (a)
-#endif
+// little endian
+#define RIX_SWAP32(a) (a)
+#define RIX_SWAP16(a) (a)
 
 #ifdef DEBUG
 #define RELEASE_INLINE
@@ -248,7 +238,7 @@ RELEASE_INLINE uint16_t CrixPlayer::ad_initial()
 		f_buffer[i*12]=((uint16_t)res+4)>>3;
 		for(int t=1;t<12;t++)
 		{
-			res*=1.06;
+			res+=res * 3 / 50;
 			f_buffer[i*12+t]=((uint16_t)res+4)>>3;
 		}
   }

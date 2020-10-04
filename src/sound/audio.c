@@ -392,7 +392,7 @@ AUDIO_PlaySound(
    // the mutex lock is obtained inside the SOUND_Play function rather than here.
    if (gAudioDevice.pSoundPlayer)
    {
-      gAudioDevice.pSoundPlayer->Play(gAudioDevice.pSoundPlayer, abs(iSoundNum), FALSE, 0.0f);
+      gAudioDevice.pSoundPlayer->Play(gAudioDevice.pSoundPlayer, abs(iSoundNum), FALSE, 0);
    }
 }
 

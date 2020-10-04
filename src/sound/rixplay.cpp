@@ -102,7 +102,7 @@ RIX_FillBuffer(
 			}
 			else
 			{
-				volume = (INT)(SDL_MIX_MAXVOLUME * (1.0 - (double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples));
+				volume = SDL_MIX_MAXVOLUME - SDL_MIX_MAXVOLUME * pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples;
 				delta_samples = (pRixPlayer->iTotalFadeInSamples / SDL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1); vol_delta = 1;
 			}
 			break;
@@ -145,7 +145,7 @@ RIX_FillBuffer(
 			}
 			else
 			{
-				volume = (INT)(SDL_MIX_MAXVOLUME * ((double)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeOutSamples));
+				volume = SDL_MIX_MAXVOLUME * pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeOutSamples;
 				delta_samples = (pRixPlayer->iTotalFadeOutSamples / SDL_MIX_MAXVOLUME) & ~(gConfig.iAudioChannels - 1); vol_delta = -1;
 			}
 			break;
@@ -299,7 +299,7 @@ RIX_Play(
 	VOID     *object,
 	INT       iNumRIX,
 	BOOL      fLoop,
-	float     flFadeTime
+	INT       flFadeTime
 )
 /*++
 	Purpose:
@@ -342,19 +342,19 @@ RIX_Play(
 	{
 		if (pRixPlayer->FadeType == RIXPLAYER::FADE_IN && pRixPlayer->iTotalFadeInSamples > 0 && pRixPlayer->iRemainingFadeSamples > 0)
 		{
-			pRixPlayer->dwStartFadeTime = SDL_GetTicks() - (int)((float)pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples * flFadeTime * (1000 / 2));
+			pRixPlayer->dwStartFadeTime = SDL_GetTicks() - (flFadeTime * 500 * pRixPlayer->iRemainingFadeSamples / pRixPlayer->iTotalFadeInSamples);
 		}
 		else
 		{
 			pRixPlayer->dwStartFadeTime = SDL_GetTicks();
 		}
-		pRixPlayer->iTotalFadeOutSamples = (int)round(flFadeTime / 2.0f * gConfig.iSampleRate) * gConfig.iAudioChannels;
+		pRixPlayer->iTotalFadeOutSamples = gConfig.iSampleRate / 2 * gConfig.iAudioChannels * flFadeTime;
 		pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeOutSamples;
 		pRixPlayer->iTotalFadeInSamples = pRixPlayer->iTotalFadeOutSamples;
 	}
 	else
 	{
-		pRixPlayer->iTotalFadeInSamples = (int)round(flFadeTime / 2.0f * gConfig.iSampleRate) * gConfig.iAudioChannels;
+		pRixPlayer->iTotalFadeInSamples = gConfig.iSampleRate / 2 * gConfig.iAudioChannels * flFadeTime;
 	}
 
 	pRixPlayer->iNextMusic = iNumRIX;
