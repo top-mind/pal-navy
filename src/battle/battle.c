@@ -22,6 +22,8 @@
 
 #include "main.h"
 
+void UpdateFPS(uint32_t now);
+
 BATTLE          g_Battle;
 
 WORD
@@ -378,10 +380,13 @@ PAL_BattleMain(
       //
       PAL_DelayUntil(dwTime);
 
+      uint32_t now = SDL_GetTicks();
+      UpdateFPS(now);
+
       //
       // Set the time of the next frame.
       //
-      dwTime = SDL_GetTicks() + BATTLE_FRAME_TIME;
+      dwTime = now + BATTLE_FRAME_TIME;
 
       //
       // Run the main frame routine.

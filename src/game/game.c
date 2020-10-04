@@ -22,6 +22,8 @@
 
 #include "main.h"
 
+void UpdateFPS(uint32_t now);
+
 static VOID
 PAL_GameStart(
    VOID
@@ -117,10 +119,13 @@ PAL_GameMain(
       //
       PAL_DelayUntil(dwTime);
 
+      uint32_t now = SDL_GetTicks();
+      UpdateFPS(now);
+
       //
       // Set the time of the next frame.
       //
-      dwTime = SDL_GetTicks() + FRAME_TIME;
+      dwTime = now + FRAME_TIME;
 
       //
       // Run the main frame routine.

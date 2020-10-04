@@ -21,6 +21,8 @@
 //
 #include "main.h"
 
+void IncreaseDraw();
+
 // Screen buffer
 SDL_Surface              *gpScreen           = NULL;
 
@@ -269,6 +271,7 @@ VIDEO_UpdateScreen(
    }
 
    SDL_UpdateRect(gpScreenReal, dstrect.x, dstrect.y, dstrect.w, dstrect.h);
+   IncreaseDraw();
 
    if (SDL_MUSTLOCK(gpScreenReal))
    {
@@ -304,6 +307,7 @@ VIDEO_SetPalette(
       if (SDL_GetTicks() - time > 50)
       {
 	      SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+        IncreaseDraw();
 	      time = SDL_GetTicks();
       }
    }
@@ -530,6 +534,7 @@ VIDEO_SwitchScreen(
 
       SDL_SoftStretch(gpScreenBak, NULL, gpScreenReal, &dstrect);
       SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+      IncreaseDraw();
 
 	  if (SDL_MUSTLOCK(gpScreenReal))
 	  {
@@ -668,7 +673,8 @@ VIDEO_FadeScreen(
             dstrect.h = g_wShakeLevel * screenRealHeight / gpScreen->h;
 
             SDL_FillRect(gpScreenReal, &dstrect, 0);
-			SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+            SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+            IncreaseDraw();
             g_wShakeTime--;
          }
          else
@@ -680,6 +686,7 @@ VIDEO_FadeScreen(
 
             SDL_SoftStretch(gpScreenBak, NULL, gpScreenReal, &dstrect);
             SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+            IncreaseDraw();
          }
       }
    }
@@ -859,5 +866,6 @@ VIDEO_DrawSurfaceToScreen(
    SDL_SoftStretch(pCompatSurface, NULL, gpScreenReal, NULL);
 
    SDL_UpdateRect(gpScreenReal, 0, 0, gpScreenReal->w, gpScreenReal->h);
+   IncreaseDraw();
    SDL_FreeSurface(pCompatSurface);
 }
