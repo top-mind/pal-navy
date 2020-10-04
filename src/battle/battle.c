@@ -944,7 +944,7 @@ PAL_BattleWon(
       }
       else if (g_Battle.iExpGained > 0)
       {
-         FLOAT f =
+         float f =
             (gpGlobals->g.rgLevelUpExp[gpGlobals->g.PlayerRoles.rgwLevel[w]] / 5.0f) / g_Battle.iExpGained;
 
          if (f < 2)
@@ -1206,7 +1206,7 @@ PAL_StartBattle(
          g_Battle.rgEnemy[i].iColorShift = 0;
 
 #ifndef PAL_CLASSIC
-         g_Battle.rgEnemy[i].flTimeMeter = 50;
+         g_Battle.rgEnemy[i].flTimeMeter = FLOATfromInt(50);
 
          //
          // HACK: Otherwise the black thief lady will be too hard to beat
@@ -1311,9 +1311,9 @@ PAL_StartBattle(
    //
    for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
    {
-      g_Battle.rgPlayer[i].flTimeMeter = 15.0f;
+      g_Battle.rgPlayer[i].flTimeMeter = FLOATfromInt(15);
 #ifndef PAL_CLASSIC
-      g_Battle.rgPlayer[i].flTimeSpeedModifier = 2.0f;
+      g_Battle.rgPlayer[i].flTimeSpeedModifier = 2;
       g_Battle.rgPlayer[i].sTurnOrder = -1;
 #endif
       g_Battle.rgPlayer[i].wHidingTime = 0;

@@ -725,7 +725,7 @@ SOUND_Play(
    VOID  *object,
    INT    iSoundNum,
    BOOL   fLoop,
-   FLOAT  flFadeTime
+   float  flFadeTime
 )
 /*++
   Purpose:

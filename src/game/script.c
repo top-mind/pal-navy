@@ -1968,7 +1968,8 @@ PAL_InterpretInstruction(
       // Throw weapon to enemy
       //
       w = pScript->rgwOperand[1] * 5;
-      w += gpGlobals->g.PlayerRoles.rgwAttackStrength[gpGlobals->rgParty[g_Battle.wMovingPlayerIndex].wPlayerRole] * RandomFloat(0, 4);
+      WORD strength = gpGlobals->g.PlayerRoles.rgwAttackStrength[gpGlobals->rgParty[g_Battle.wMovingPlayerIndex].wPlayerRole];
+      w += FLOATtoInt(FLOATmuli(RandomFloat(0, FLOATfromInt(4)), strength));
       PAL_BattleSimulateMagic((SHORT)wEventObjectID, pScript->rgwOperand[0], w);
       break;
 
@@ -2787,7 +2788,7 @@ PAL_InterpretInstruction(
             g_Battle.rgEnemy[i].wScriptOnReady = g_Battle.rgEnemy[wEventObjectID].wScriptOnReady;
 
             g_Battle.rgEnemy[i].state = kFighterWait;
-            g_Battle.rgEnemy[i].flTimeMeter = 50;
+            g_Battle.rgEnemy[i].flTimeMeter = FLOATfromInt(50);
             g_Battle.rgEnemy[i].iColorShift = 0;
 
          }
@@ -2881,7 +2882,7 @@ PAL_InterpretInstruction(
                g_Battle.rgEnemy[i].wScriptOnTurnStart = gpGlobals->g.rgObject[w].enemy.wScriptOnTurnStart;
                g_Battle.rgEnemy[i].wScriptOnBattleEnd = gpGlobals->g.rgObject[w].enemy.wScriptOnBattleEnd;
                g_Battle.rgEnemy[i].wScriptOnReady = gpGlobals->g.rgObject[w].enemy.wScriptOnReady;
-               g_Battle.rgEnemy[i].flTimeMeter = 50;
+               g_Battle.rgEnemy[i].flTimeMeter = FLOATfromInt(50);
                g_Battle.rgEnemy[i].iColorShift = 8;
 
                y--;

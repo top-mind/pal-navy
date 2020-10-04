@@ -34,7 +34,7 @@ typedef struct tagAUDIOPLAYER
     INT                        iMusic;  \
     BOOL                       fLoop; \
 	VOID (*Shutdown)(VOID*); \
-	BOOL (*Play)(VOID*, INT, BOOL, FLOAT); \
+	BOOL (*Play)(VOID*, INT, BOOL, float); \
 	VOID (*FillBuffer)(VOID*, LPBYTE, INT)
 
 	AUDIOPLAYER_COMMONS;

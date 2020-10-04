@@ -156,11 +156,11 @@ PAL_CalcBaseDamage(
    //
    if (wAttackStrength > wDefense)
    {
-      sDamage = (SHORT)(wAttackStrength * 2 - wDefense * 1.6 + 0.5);
+      sDamage = (SHORT)(wAttackStrength * 20 - wDefense * 16 + 5) / 10;
    }
-   else if (wAttackStrength > wDefense * 0.6)
+   else if (wAttackStrength > wDefense * 3 / 5)
    {
-      sDamage = (SHORT)(wAttackStrength - wDefense * 0.6 + 0.5);
+      sDamage = (SHORT)(wAttackStrength * 10 - wDefense * 6 + 5) / 10;
    }
    else
    {
@@ -212,7 +212,7 @@ PAL_CalcMagicDamage(
    //
    // Formula courtesy of palxex and shenyanduxing
    //
-   wMagicStrength *= RandomFloat(10, 11);
+   wMagicStrength = FLOATtoInt(FLOATmuli(RandomFloat(FLOATfromInt(10), FLOATfromInt(11)), wMagicStrength));
    wMagicStrength /= 10;
 
    sDamage = PAL_CalcBaseDamage(wMagicStrength, wDefense);
@@ -226,7 +226,7 @@ PAL_CalcMagicDamage(
 
       if (wElem > NUM_MAGIC_ELEMENTAL)
       {
-         sDamage *= 10 - ((FLOAT)wPoisonResistance / wResistanceMultiplier);
+         sDamage = sDamage * 10 - sDamage * wPoisonResistance / wResistanceMultiplier;
       }
       else if (wElem == 0)
       {
@@ -234,7 +234,7 @@ PAL_CalcMagicDamage(
       }
       else
       {
-         sDamage *= 10 - ((FLOAT)rgwElementalResistance[wElem - 1] / wResistanceMultiplier);
+         sDamage = sDamage * 10 - sDamage * rgwElementalResistance[wElem - 1] / wResistanceMultiplier;
       }
 
       sDamage /= 5;
@@ -410,16 +410,16 @@ PAL_UpdateTimeChargingUnit(
 
 --*/
 {
-   g_Battle.flTimeChargingUnit = (FLOAT)(pow(PAL_GetPlayerDexterity(0) + 5, 0.3));
-   g_Battle.flTimeChargingUnit /= PAL_GetPlayerDexterity(0);
+   g_Battle.flTimeChargingUnit = FLOATpow(FLOATfromInt(PAL_GetPlayerDexterity(0) + 5), FLOATconst(0.3f));
+   g_Battle.flTimeChargingUnit = FLOATdivi(g_Battle.flTimeChargingUnit, PAL_GetPlayerDexterity(0));
 
    if (gpGlobals->bBattleSpeed > 1)
    {
-      g_Battle.flTimeChargingUnit /= 1 + (gpGlobals->bBattleSpeed - 1) * 0.5;
+      g_Battle.flTimeChargingUnit = FLOATdivi(FLOATmuli(g_Battle.flTimeChargingUnit, 2), 1 + gpGlobals->bBattleSpeed);
    }
    else
    {
-      g_Battle.flTimeChargingUnit /= 1.2f;
+      g_Battle.flTimeChargingUnit = FLOATdivi(FLOATmuli(g_Battle.flTimeChargingUnit, 5), 6);
    }
 }
 
@@ -460,7 +460,7 @@ PAL_GetTimeChargingSpeed(
       wDexterity *= 3;
    }
 
-   return g_Battle.flTimeChargingUnit * wDexterity;
+   return FLOATmuli(g_Battle.flTimeChargingUnit, wDexterity);
 }
 
 #endif
@@ -1035,7 +1035,7 @@ PAL_BattlePlayerCheckReady(
 
 --*/
 {
-   float   flMax = 0;
+   FLOAT   flMax = 0;
    int     iMax = 0, i;
 
    //
@@ -1059,7 +1059,7 @@ PAL_BattlePlayerCheckReady(
       }
    }
 
-   if (flMax >= 100.0f)
+   if (flMax >= FLOATfromInt(100))
    {
       g_Battle.rgPlayer[iMax].state = kFighterCom;
       g_Battle.rgPlayer[iMax].fDefending = FALSE;
@@ -1155,7 +1155,7 @@ PAL_BattleStartFrame(
    //
    if (g_Battle.iHidingTime > 0)
    {
-      if (PAL_GetTimeChargingSpeed(9999) > 0)
+      if (PAL_GetTimeChargingSpeed(9999) != 0)
       {
          g_Battle.iHidingTime--;
       }
@@ -1199,13 +1199,13 @@ PAL_BattleStartFrame(
       {
       case kFighterWait:
          flMax = PAL_GetTimeChargingSpeed(PAL_GetEnemyDexterity(i));
-         flMax /= (gpGlobals->fAutoBattle ? 2 : 1);
+         flMax = FLOATdivi(flMax, gpGlobals->fAutoBattle ? 2 : 1);
 
          if (flMax != 0)
          {
             g_Battle.rgEnemy[i].flTimeMeter += flMax;
 
-            if (g_Battle.rgEnemy[i].flTimeMeter > 100 && flMax > 0)
+            if (g_Battle.rgEnemy[i].flTimeMeter > FLOATfromInt(100) && flMax > 0)
             {
                if (g_Battle.iHidingTime == 0)
                {
@@ -1227,7 +1227,7 @@ PAL_BattleStartFrame(
          break;
 
       case kFighterAct:
-         if (!fMoved && (PAL_GetTimeChargingSpeed(9999) > 0 || g_Battle.rgEnemy[i].fDualMove) && !fOnlyPuppet)
+         if (!fMoved && (PAL_GetTimeChargingSpeed(9999) != 0 || g_Battle.rgEnemy[i].fDualMove) && !fOnlyPuppet)
          {
             fMoved = TRUE;
 
@@ -1246,7 +1246,7 @@ PAL_BattleStartFrame(
 
             if (g_Battle.rgEnemy[i].fDualMove)
             {
-               g_Battle.rgEnemy[i].flTimeMeter = 100;
+               g_Battle.rgEnemy[i].flTimeMeter = FLOATfromInt(100);
                g_Battle.rgEnemy[i].state = kFighterCom;
                g_Battle.rgEnemy[i].fFirstMoveDone = TRUE;
             }
@@ -1280,7 +1280,7 @@ PAL_BattleStartFrame(
       {
          g_Battle.rgPlayer[i].state = kFighterWait;
          g_Battle.rgPlayer[i].flTimeMeter = 0;
-         g_Battle.rgPlayer[i].flTimeSpeedModifier = 1.0f;
+         g_Battle.rgPlayer[i].flTimeSpeedModifier = 1;
          g_Battle.rgPlayer[i].sTurnOrder = -1;
          continue;
       }
@@ -1290,7 +1290,7 @@ PAL_BattleStartFrame(
       case kFighterWait:
          wDexterity = PAL_GetPlayerActualDexterity(wPlayerRole);
          g_Battle.rgPlayer[i].flTimeMeter +=
-            PAL_GetTimeChargingSpeed(wDexterity) * g_Battle.rgPlayer[i].flTimeSpeedModifier;
+            FLOATmuli(PAL_GetTimeChargingSpeed(wDexterity), g_Battle.rgPlayer[i].flTimeSpeedModifier);
          break;
 
       case kFighterCom:
@@ -1375,7 +1375,7 @@ PAL_BattleStartFrame(
          PAL_BattlePlayerPerformAction(sMaxIndex);
 
          g_Battle.rgPlayer[sMaxIndex].flTimeMeter = 0;
-         g_Battle.rgPlayer[sMaxIndex].flTimeSpeedModifier = 1.0f;
+         g_Battle.rgPlayer[sMaxIndex].flTimeSpeedModifier = 1;
          g_Battle.rgPlayer[sMaxIndex].sTurnOrder = -1;
       }
    }
@@ -1466,7 +1466,8 @@ PAL_BattleStartFrame(
                g_Battle.ActionQueue[j].fIsEnemy = TRUE;
                g_Battle.ActionQueue[j].wIndex = i;
                g_Battle.ActionQueue[j].wDexterity = PAL_GetEnemyDexterity(i);
-               g_Battle.ActionQueue[j].wDexterity *= RandomFloat(0.9f, 1.1f);
+               FLOAT rand = RandomFloat(FLOATconst(0.9f), FLOATconst(1.1f));
+               g_Battle.ActionQueue[j].wDexterity = FLOATtoInt(FLOATmuli(rand, g_Battle.ActionQueue[j].wDexterity));
 
                j++;
 
@@ -1475,7 +1476,8 @@ PAL_BattleStartFrame(
                   g_Battle.ActionQueue[j].fIsEnemy = TRUE;
                   g_Battle.ActionQueue[j].wIndex = i;
                   g_Battle.ActionQueue[j].wDexterity = PAL_GetEnemyDexterity(i);
-                  g_Battle.ActionQueue[j].wDexterity *= RandomFloat(0.9f, 1.1f);
+                  FLOAT rand = RandomFloat(FLOATconst(0.9f), FLOATconst(1.1f));
+                  g_Battle.ActionQueue[j].wDexterity = FLOATtoInt(FLOATmuli(rand, g_Battle.ActionQueue[j].wDexterity));
 
                   j++;
                }
@@ -1549,7 +1551,8 @@ PAL_BattleStartFrame(
                      wDexterity /= 2;
                   }
 
-                  wDexterity *= RandomFloat(0.9f, 1.1f);
+                  FLOAT rand = RandomFloat(FLOATconst(0.9f), FLOATconst(1.1f));
+                  wDexterity = FLOATtoInt(FLOATmuli(rand, wDexterity));
 
                   g_Battle.ActionQueue[j].wDexterity = wDexterity;
                }
@@ -1946,7 +1949,7 @@ PAL_BattleCommitAction(
             wCostMP /= 3;
          }
 
-         g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.flRemainingTime = wCostMP + 5;
+         g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].action.flRemainingTime = FLOATfromInt(wCostMP + 5);
       }
       break;
 
@@ -3290,7 +3293,7 @@ PAL_BattlePlayerValidateAction(
             gpGlobals->rgPlayerStatus[w][kStatusSilence] > 0 ||
             gpGlobals->rgPlayerStatus[w][kStatusSleep] > 0 ||
             gpGlobals->rgPlayerStatus[w][kStatusConfused] > 0 ||
-            g_Battle.rgPlayer[i].flTimeMeter < 100 ||
+            g_Battle.rgPlayer[i].flTimeMeter < FLOATfromInt(100) ||
             (g_Battle.rgPlayer[i].state == kFighterAct && i != wPlayerIndex))
          {
             g_Battle.rgPlayer[wPlayerIndex].action.ActionType = kBattleActionAttack;
@@ -3559,7 +3562,8 @@ PAL_BattlePlayerPerformAction(
                fCritical = TRUE;
             }
 
-            sDamage = (SHORT)(sDamage * RandomFloat(1, 1.125));
+            FLOAT rand = RandomFloat(FLOATconst(1.0f), FLOATconst(1.125f));
+            sDamage = (SHORT)FLOATtoInt(FLOATmuli(rand, sDamage));
 
             if (sDamage <= 0)
             {
@@ -3622,7 +3626,8 @@ PAL_BattlePlayerPerformAction(
 
                sDamage /= division;
 
-               sDamage = (SHORT)(sDamage * RandomFloat(1, 1.125));
+               FLOAT rand = RandomFloat(FLOATconst(1.0f), FLOATconst(1.125f));
+               sDamage = (SHORT)FLOATtoInt(FLOATmuli(rand, sDamage));
 
                if (sDamage <= 0)
                {

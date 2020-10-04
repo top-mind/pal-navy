@@ -39,6 +39,7 @@
 #include <stdbool.h>
 
 #include "mySDL.h"
+#include "myFLOAT.h"
 
 #define __WIDETEXT(quote) L##quote
 #define WIDETEXT(quote) __WIDETEXT(quote)
@@ -73,7 +74,6 @@ typedef int                 BOOL, *LPBOOL;
 typedef unsigned int        UINT, *PUINT, UINT32, *PUINT32;
 typedef unsigned char       BYTE, *LPBYTE;
 typedef const BYTE         *LPCBYTE;
-typedef float               FLOAT, *LPFLOAT;
 typedef void               *LPVOID;
 typedef const void         *LPCVOID;
 typedef CHAR               *LPSTR;

@@ -101,7 +101,7 @@ typedef struct tagBATTLEPLAYER
 {
    INT                iColorShift;
    FLOAT              flTimeMeter;          // time-charging meter (0 = empty, 100 = full).
-   FLOAT              flTimeSpeedModifier;
+   INT                flTimeSpeedModifier;
    WORD               wHidingTime;          // remaining hiding time
    LPSPRITE           lpSprite;
    PAL_POS            pos;                  // current position on the screen

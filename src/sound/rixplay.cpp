@@ -299,7 +299,7 @@ RIX_Play(
 	VOID     *object,
 	INT       iNumRIX,
 	BOOL      fLoop,
-	FLOAT     flFadeTime
+	float     flFadeTime
 )
 /*++
 	Purpose:

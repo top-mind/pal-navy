@@ -66,10 +66,10 @@ RandomLong(
    int to
 );
 
-float
+FLOAT
 RandomFloat(
-   float from,
-   float to
+   FLOAT from,
+   FLOAT to
 );
 
 void

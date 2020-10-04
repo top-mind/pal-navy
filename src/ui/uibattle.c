@@ -320,7 +320,7 @@ PAL_BattleUIIsActionValid(
             gpGlobals->rgPlayerStatus[w][kStatusSleep] != 0 ||
             gpGlobals->rgPlayerStatus[w][kStatusConfused] != 0 ||
             gpGlobals->rgPlayerStatus[w][kStatusSilence] != 0 ||
-            g_Battle.rgPlayer[i].flTimeMeter < 100 ||
+            g_Battle.rgPlayer[i].flTimeMeter < FLOATfromInt(100) ||
             g_Battle.rgPlayer[i].state == kFighterAct)
          {
             return FALSE;
@@ -888,7 +888,7 @@ PAL_BattleUIUpdate(
       for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
       {
          wPlayerRole = gpGlobals->rgParty[i].wPlayerRole;
-         w = (WORD)(g_Battle.rgPlayer[i].flTimeMeter);
+         w = FLOATtoInt(g_Battle.rgPlayer[i].flTimeMeter);
 
          j = TIMEMETER_COLOR_DEFAULT;
 
@@ -1273,14 +1273,14 @@ PAL_BattleUIUpdate(
 #else
             else if (g_InputState.dwKeyPress & kKeyMenu)
             {
-               float flMin = -1;
+               FLOAT flMin = FLOATfromInt(-1);
                j = -1;
 
                for (i = 0; i <= gpGlobals->wMaxPartyMemberIndex; i++)
                {
-                  if (g_Battle.rgPlayer[i].flTimeMeter >= 100)
+                  if (g_Battle.rgPlayer[i].flTimeMeter >= FLOATfromInt(100))
                   {
-                     g_Battle.rgPlayer[i].flTimeMeter += 100; // HACKHACK: Prevent the time meter from going below 100
+                     g_Battle.rgPlayer[i].flTimeMeter += FLOATfromInt(100); // HACKHACK: Prevent the time meter from going below 100
 
                      if ((g_Battle.rgPlayer[i].flTimeMeter < flMin || flMin < 0) &&
                         i != (int)g_Battle.UI.wCurPlayerIndex &&
@@ -1294,7 +1294,7 @@ PAL_BattleUIUpdate(
 
                if (j != -1)
                {
-                  g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].flTimeMeter = flMin - 99;
+                  g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].flTimeMeter = flMin - FLOATfromInt(99);
                   g_Battle.rgPlayer[g_Battle.UI.wCurPlayerIndex].state = kFighterWait;
                   g_Battle.UI.state = kBattleUIWait;
                }

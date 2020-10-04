@@ -180,10 +180,10 @@ RandomLong(
    return from + lrand() / (INT_MAX / (to - from + 1));
 }
 
-float
+FLOAT
 RandomFloat(
-   float from,
-   float to
+   FLOAT from,
+   FLOAT to
 )
 /*++
   Purpose:
@@ -203,10 +203,14 @@ RandomFloat(
 
 --*/
 {
+#ifdef USE_FIXEDPT
+   return RandomLong(from, to);
+#else
    if (to <= from)
       return from;
 
    return from + (float)lrand() / (INT_MAX / (to - from));
+#endif
 }
 
 void
