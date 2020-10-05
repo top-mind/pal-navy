@@ -47,7 +47,7 @@
 
 //namespace DBOPL {
 
-#define OPLRATE		((double)(14318180.0 / 288.0))
+#define OPLRATE		49716 //((double)(14318180.0 / 288.0))
 #define TREMOLO_TABLE 52
 
 //Try to use most precision for frequencies
@@ -150,7 +150,11 @@ static Bit16u SinTable[ 512 ];
 
 //6 is just 0 shifted and masked
 
-static Bit16s WaveTable[ 8 * 512 ];
+static Bit16s WaveTable[ 8 * 512 ] = {
+#if ( DBOPL_WAVE == WAVE_TABLEMUL )
+#include "WaveTable.h"
+#endif
+};
 //Distance into WaveTable the wave starts
 static const Bit16u WaveBaseTable[8] = {
 	0x000, 0x200, 0x200, 0x800,
@@ -171,7 +175,9 @@ static const Bit16u WaveStartTable[8] = {
 #endif
 
 #if ( DBOPL_WAVE == WAVE_TABLEMUL )
-static Bit16u MulTable[ 384 ];
+static Bit16u MulTable[ 384 ] = {
+#include "MulTable.h"
+};
 #endif
 
 static Bit8u KslTable[ 8 * 16 ];
@@ -1213,17 +1219,13 @@ void Chip::GenerateBlock3( Bitu total, Bit32s* output  ) {
 }
 
 void Chip::Setup( Bit32u rate ) {
-	double original = OPLRATE;
-//	double original = rate;
-	double scale = original / (double)rate;
-
 	//Noise counter is run at the same precision as general waves
-	noiseAdd = (Bit32u)( 0.5 + scale * ( 1 << LFO_SH ) );
+	noiseAdd = (Bit32u)(OPLRATE * ( 1 << LFO_SH ) / rate);
 	noiseCounter = 0;
 	noiseValue = 1;	//Make sure it triggers the noise xor the first time
 	//The low frequency oscillation counter
 	//Every time his overflows vibrato and tremoloindex are increased
-	lfoAdd = (Bit32u)( 0.5 + scale * ( 1 << LFO_SH ) );
+	lfoAdd = noiseAdd;
 	lfoCounter = 0;
 	vibratoIndex = 0;
 	tremoloIndex = 0;
@@ -1231,12 +1233,13 @@ void Chip::Setup( Bit32u rate ) {
 	//With higher octave this gets shifted up
 	//-1 since the freqCreateTable = *2
 #ifdef WAVE_PRECISION
+	double scale = OPLRATE / (double)rate;
 	double freqScale = ( 1 << 7 ) * scale * ( 1 << ( WAVE_SH - 1 - 10));
 	for ( int i = 0; i < 16; i++ ) {
 		freqMul[i] = (Bit32u)( 0.5 + freqScale * FreqCreateTable[ i ] );
 	}
 #else
-	Bit32u freqScale = (Bit32u)( 0.5 + scale * ( 1 << ( WAVE_SH - 1 - 10)));
+	Bit32u freqScale = (Bit32u)(OPLRATE * ( 1 << ( WAVE_SH - 1 - 10)) / rate);
 	for ( int i = 0; i < 16; i++ ) {
 		freqMul[i] = freqScale * FreqCreateTable[ i ];
 	}
@@ -1246,7 +1249,10 @@ void Chip::Setup( Bit32u rate ) {
 	for ( Bit8u i = 0; i < 76; i++ ) {
 		Bit8u index, shift;
 		EnvelopeSelect( i, index, shift );
-		linearRates[i] = (Bit32u)( scale * (EnvelopeIncreaseTable[ index ] << ( RATE_SH + ENV_EXTRA - shift - 3 )));
+		int lshift = RATE_SH + ENV_EXTRA - shift - 3;
+		int first_shift = 8;
+		assert(lshift > first_shift);
+		linearRates[i] = (Bit32u)( (OPLRATE << first_shift ) / rate * (EnvelopeIncreaseTable[ index ] << (lshift - first_shift)));
 	}
 //	Bit32s attackDiffs[62];
 	//Generate the best matching attack rate
@@ -1254,9 +1260,12 @@ void Chip::Setup( Bit32u rate ) {
 		Bit8u index, shift;
 		EnvelopeSelect( i, index, shift );
 		//Original amount of samples the attack would take
-		Bit32s original = (Bit32u)( (AttackSamplesTable[ index ] << shift) / scale);
+		Bit32s original = (Bit32u)( (uint64_t)(AttackSamplesTable[ index ] << shift) * rate / OPLRATE);
 		 
-		Bit32s guessAdd = (Bit32u)( scale * (EnvelopeIncreaseTable[ index ] << ( RATE_SH - shift - 3 )));
+		int lshift = RATE_SH - shift - 3;
+		int first_shift = 8;
+		assert(lshift > first_shift);
+		Bit32s guessAdd = (Bit32u)( (OPLRATE << first_shift ) / rate * (EnvelopeIncreaseTable[ index ] << ( lshift - first_shift)));
 		Bit32s bestAdd = guessAdd;
 		Bit32u bestDiff = 1 << 30;
 		for( Bit32u passes = 0; passes < 16; passes ++ ) {
@@ -1284,8 +1293,7 @@ void Chip::Setup( Bit32u rate ) {
 					break;
 			}
 			//Linear correction factor, not exactly perfect but seems to work
-			double correct = (original - diff) / (double)original;
-			guessAdd = (Bit32u)(guessAdd * correct);
+			guessAdd = (Bit32u)(guessAdd * (original - diff) / original);
 			//Below our target
 			if ( diff < 0 ) {
 				//Always add one here for rounding, an overshoot will get corrected by another pass decreasing
@@ -1356,24 +1364,7 @@ bool InitTables( void ) {
 	}
 #endif
 #if ( DBOPL_WAVE == WAVE_TABLEMUL )
-	//Multiplication based tables
-	for ( int i = 0; i < 384; i++ ) {
-		int s = i * 8;
-		//TODO maybe keep some of the precision errors of the original table?
-		double val = ( 0.5 + ( pow(2.0, -1.0 + ( 255 - s) * ( 1.0 /256 ) )) * ( 1 << MUL_SH ));
-		MulTable[i] = (Bit16u)(val);
-	}
-
-	//Sine Wave Base
-	for ( int i = 0; i < 512; i++ ) {
-		WaveTable[ 0x0200 + i ] = (Bit16s)(sin( (i + 0.5) * (PI / 512.0) ) * 4084);
-		WaveTable[ 0x0000 + i ] = -WaveTable[ 0x200 + i ];
-	}
-	//Exponential wave
-	for ( int i = 0; i < 256; i++ ) {
-		WaveTable[ 0x700 + i ] = (Bit16s)( 0.5 + ( pow(2.0, -1.0 + ( 255 - i * 8) * ( 1.0 /256 ) ) ) * 4085 );
-		WaveTable[ 0x6ff - i ] = -WaveTable[ 0x700 + i ];
-	}
+  // already use pre-compute tables
 #endif
 #if ( DBOPL_WAVE == WAVE_TABLELOG )
 	//Sine Wave Base
@@ -1392,7 +1383,8 @@ bool InitTables( void ) {
 	//	|\\//|    |    |WAV7|    |  \/|    |    |
 	//	|06  |0126|27  |7   |3   |4   |4 5 |5   |
 
-#if (( DBOPL_WAVE == WAVE_TABLELOG ) || ( DBOPL_WAVE == WAVE_TABLEMUL ))
+//#if (( DBOPL_WAVE == WAVE_TABLELOG ) || ( DBOPL_WAVE == WAVE_TABLEMUL ))
+#if (( DBOPL_WAVE == WAVE_TABLELOG ))
 	for ( int i = 0; i < 256; i++ ) {
 		//Fill silence gaps
 		WaveTable[ 0x400 + i ] = WaveTable[0];
