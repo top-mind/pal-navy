@@ -41,8 +41,6 @@
  */
 
 #include "dosbox_opls.h"
-#include "mame_opls.h"
-#include "nuked_opl.h"
 
 Copl* CEmuopl::CreateEmuopl(OPLCORE::TYPE core, Copl::ChipType type, int rate) {
 
@@ -50,11 +48,5 @@ Copl* CEmuopl::CreateEmuopl(OPLCORE::TYPE core, Copl::ChipType type, int rate) {
 		return NULL;
 	}
 
-	switch (core) {
-	case OPLCORE::MAME:  return new CEmuopl(type == Copl::TYPE_OPL3 ? (OPLCORE*)(new MAMEOPL3(rate))  : (OPLCORE*)(new MAMEOPL2(rate)) , type);
-	case OPLCORE::DBFLT: return new CEmuopl(type == Copl::TYPE_OPL3 ? (OPLCORE*)(new DBFLTOPL3(rate)) : (OPLCORE*)(new DBFLTOPL2(rate)), type);
-	case OPLCORE::DBINT: return new CEmuopl(type == Copl::TYPE_OPL3 ? (OPLCORE*)(new DBINTOPL3(rate)) : (OPLCORE*)(new DBINTOPL2(rate)), type);
-	case OPLCORE::NUKED: return new CEmuopl(new NUKEDOPL3(rate), TYPE_OPL3);
-	default: return NULL;
-	}
+	return new CEmuopl((OPLCORE*)(new DBINTOPL2(rate)) , type);
 }

@@ -29,54 +29,11 @@
 #include "dosbox/dosbox.h"
 #include "emuopls.h"
 
-namespace DBOPL2
-{
-#	undef SDLPAL_DOSBOXOPL_H
-#	undef OPLTYPE_IS_OPL3
-#	include "dosbox/opl.h"
-}
-
-namespace DBOPL3
-{
-#	undef SDLPAL_DOSBOXOPL_H
-#	define OPLTYPE_IS_OPL3
-#	include "dosbox/opl.h"
-#	undef OPLTYPE_IS_OPL3
-}
-
 namespace DBOPL
 {
 #	undef SDLPAL_DBOPL_H
 #	include "dosbox/dbopl.h"
 }
-
-class DBFLTOPL2 : public OPLCORE
-{
-public:
-	DBFLTOPL2(uint32_t samplerate) : OPLCORE(samplerate) {}
-
-	void Reset() { DBOPL2::adlib_init(&chip, rate); }
-	void Write(uint32_t reg, uint8_t val) { DBOPL2::adlib_write(&chip, reg, val); }
-	void Generate(short* buf, int samples) { DBOPL2::adlib_getsample(&chip, buf, samples); }
-	OPLCORE* Duplicate() { return new DBFLTOPL2(rate); }
-
-private:
-	DBOPL2::opl_chip chip;
-};
-
-class DBFLTOPL3 : public OPLCORE
-{
-public:
-	DBFLTOPL3(uint32_t samplerate) : OPLCORE(samplerate) {}
-
-	void Reset() { DBOPL3::adlib_init(&chip, rate); }
-	void Write(uint32_t reg, uint8_t val) { DBOPL3::adlib_write(&chip, reg, val); }
-	void Generate(short* buf, int samples) { DBOPL3::adlib_getsample(&chip, buf, samples); }
-	OPLCORE* Duplicate() { return new DBFLTOPL3(rate); }
-
-private:
-	DBOPL3::opl_chip chip;
-};
 
 static inline short clip_sample(int32_t sample) {
 	if (sample > 32767)
@@ -103,36 +60,6 @@ public:
 		}
 	}
 	OPLCORE* Duplicate() { return new DBINTOPL2(rate); }
-
-private:
-	DBOPL::Chip chip;
-};
-
-class DBINTOPL3 : public OPLCORE
-{
-public:
-	DBINTOPL3(uint32_t samplerate) : OPLCORE(samplerate) {}
-
-	void Reset() { chip.Setup(rate); }
-	void Write(uint32_t reg, uint8_t val) { chip.WriteReg(reg, val); }
-	void Generate(short* buf, int samples)
-	{
-		if (chip.opl3Active) {
-			auto buffer = (int32_t*)alloca(samples * sizeof(int32_t) * 2);
-			chip.GenerateBlock3(samples, buffer);
-			for (int i = 0; i < samples * 2; i++) {
-				buf[i] = clip_sample(buffer[i]);
-			}
-		}
-		else {
-			auto buffer = (int32_t*)alloca(samples * sizeof(int32_t));
-			chip.GenerateBlock2(samples, buffer);
-			for (int i = 0, j = 0; i < samples; i++, j += 2) {
-				buf[j + 1] = buf[j] = clip_sample(buffer[i]);
-			}
-		}
-	}
-	OPLCORE* Duplicate() { return new DBINTOPL3(rate); }
 
 private:
 	DBOPL::Chip chip;
