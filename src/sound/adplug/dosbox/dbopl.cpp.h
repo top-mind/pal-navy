@@ -796,6 +796,9 @@ void Channel::UpdateSynth( const Chip* chip ) {
 template< bool opl3Mode>
 INLINE void Channel::GeneratePercussion( Chip* chip, Bit32s* output ) {
 	Channel* chan = this;
+#ifdef __NAVY__
+	return;
+#endif
 
 	//BassDrum
 	Bit32s mod = (Bit32u)((old[0] + old[1])) >> feedback;
@@ -1027,6 +1030,9 @@ INLINE Bit32u Chip::ForwardLFO( Bit32u samples ) {
 
 
 void Chip::WriteBD( Bit8u val ) {
+#ifdef __NAVY__
+	return;
+#endif
 	Bit8u change = regBD ^ val;
 	if ( !change )
 		return;
