@@ -32,8 +32,6 @@
 //Select the type of wave generator routine
 #define DBOPL_WAVE WAVE_TABLEMUL
 
-//namespace DBOPL {
-
 struct Chip;
 struct Operator;
 struct Channel;
@@ -237,10 +235,7 @@ struct Chip {
 	void WriteBD( Bit8u val );
 	void WriteReg(Bit32u reg, Bit8u val );
 
-	Bit32u WriteAddr( Bit32u port, Bit8u val );
-
 	void GenerateBlock2( Bitu samples, Bit32s* output );
-	void GenerateBlock3( Bitu samples, Bit32s* output );
 
 	//Update the synth handlers in all channels
 	void UpdateSynths();
@@ -249,15 +244,5 @@ struct Chip {
 
 	Chip();
 };
-/*
-struct Handler : public Adlib::Handler {
-	DBOPL::Chip chip;
-	virtual Bit32u WriteAddr( Bit32u port, Bit8u val );
-	virtual void WriteReg( Bit32u addr, Bit8u val );
-	virtual void Generate( MixerChannel* chan, Bitu samples );
-	virtual void Init( Bitu rate );
-};
-*/
 
-//};		//Namespace
 #endif

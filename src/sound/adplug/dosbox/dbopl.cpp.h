@@ -45,8 +45,6 @@
 #define PI 3.14159265358979323846
 #endif
 
-//namespace DBOPL {
-
 #define OPLRATE		49716 //((double)(14318180.0 / 288.0))
 #define TREMOLO_TABLE 52
 
@@ -1182,20 +1180,6 @@ void Chip::WriteReg( Bit32u reg, Bit8u val ) {
 	}
 }
 
-
-Bit32u Chip::WriteAddr( Bit32u port, Bit8u val ) {
-	switch ( port & 3 ) {
-	case 0:
-		return val;
-	case 2:
-		if ( opl3Active || (val == 0x05) )
-			return 0x100 | val;
-		else 
-			return val;
-	}
-	return 0;
-}
-
 void Chip::GenerateBlock2( Bitu total, Bit32s* output ) {
 	while ( total > 0 ) {
 		Bit32u samples = ForwardLFO( total );
@@ -1207,20 +1191,6 @@ void Chip::GenerateBlock2( Bitu total, Bit32s* output ) {
 		}
 		total -= samples;
 		output += samples;
-	}
-}
-
-void Chip::GenerateBlock3( Bitu total, Bit32s* output  ) {
-	while ( total > 0 ) {
-		Bit32u samples = ForwardLFO( total );
-		memset(output, 0, sizeof(Bit32s) * samples *2);
-//		int count = 0;
-		for( Channel* ch = chan; ch < chan + 18; ) {
-//			count++;
-			ch = (ch->*(ch->synthHandler))( this, samples, output );
-		}
-		total -= samples;
-		output += samples * 2;
 	}
 }
 
@@ -1408,61 +1378,5 @@ bool InitTables( void ) {
 		Bitu blah = reinterpret_cast<Bitu>( &(chan->op[opNum]) );
 		OpOffsetTable[i] = ChanOffsetTable[ chNum ] + blah;
 	}
-#if 0
-	//Stupid checks if table's are correct
-	for ( Bitu i = 0; i < 18; i++ ) {
-		Bit32u find = (Bit16u)( &(chip->chan[ i ]) );
-		for ( Bitu c = 0; c < 32; c++ ) {
-			if ( ChanOffsetTable[c] == find ) {
-				find = 0;
-				break;
-			}
-		}
-		if ( find ) {
-			find = find;
-		}
-	}
-	for ( Bitu i = 0; i < 36; i++ ) {
-		Bit32u find = (Bit16u)( &(chip->chan[ i / 2 ].op[i % 2]) );
-		for ( Bitu c = 0; c < 64; c++ ) {
-			if ( OpOffsetTable[c] == find ) {
-				find = 0;
-				break;
-			}
-		}
-		if ( find ) {
-			find = find;
-		}
-	}
-#endif
 	return true;
 }
-/*
-Bit32u Handler::WriteAddr( Bit32u port, Bit8u val ) {
-	return chip.WriteAddr( port, val );
-
-}
-void Handler::WriteReg( Bit32u addr, Bit8u val ) {
-	chip.WriteReg( addr, val );
-}
-
-void Handler::Generate( MixerChannel* chan, Bitu samples ) {
-	Bit32s buffer[ 512 * 2 ];
-	if ( GCC_UNLIKELY(samples > 512) )
-		samples = 512;
-	if ( !chip.opl3Active ) {
-		chip.GenerateBlock2( samples, buffer );
-		chan->AddSamples_m32( samples, buffer );
-	} else {
-		chip.GenerateBlock3( samples, buffer );
-		chan->AddSamples_s32( samples, buffer );
-	}
-}
-
-void Handler::Init( Bitu rate ) {
-	InitTables();
-	chip.Setup( rate );
-}
-*/
-
-//};		//Namespace DBOPL

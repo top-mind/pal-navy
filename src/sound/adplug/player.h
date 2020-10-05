@@ -30,59 +30,12 @@ public:
    virtual ~CPlayer();
 
    /***** Operational methods *****/
-   void seek(unsigned long ms);
-
    virtual bool load(const char * &filename) = 0;	// loads file
    virtual bool update() = 0;			// executes replay code for 1 tick
    virtual void rewind(int subsong = -1) = 0;	// rewinds to specified subsong
-   virtual float getrefresh() = 0;			// returns needed timer refresh rate
-
-   /***** Informational methods *****/
-   unsigned long songlength(int subsong = -1);
-
-   virtual const char * gettype() = 0;	// returns file type
-   virtual const char * gettitle() {	// returns song title
-      return "";
-   }
-   virtual const char * getauthor() {	// returns song author name
-      return "";
-   }
-   virtual const char * getdesc() {	// returns song description
-      return "";
-   }
-   virtual unsigned int getpatterns() {	// returns number of patterns
-      return 0;
-   }
-   virtual unsigned int getpattern() {	// returns currently playing pattern
-      return 0;
-   }
-   virtual unsigned int getorders() {	// returns size of orderlist
-      return 0;
-   }
-   virtual unsigned int getorder() {	// returns currently playing song position
-      return 0;
-   }
-   virtual unsigned int getrow() {	// returns currently playing row
-      return 0;
-   }
-   virtual unsigned int getspeed() {	// returns current song speed
-      return 0;
-   }
-   virtual unsigned int getsubsongs() {	// returns number of subsongs
-      return 1;
-   }
-   virtual unsigned int getinstruments() {	// returns number of instruments
-      return 0;
-   }
-   virtual const char * getinstrument(unsigned int n) {	// returns n-th instrument name
-      return "";
-   }
 
 protected:
    Copl		*opl;	// our OPL chip
-
-   static const unsigned short	note_table[12];	// standard adlib note table
-   static const unsigned char	op_table[9];	// the 9 operators as expected by the OPL
 };
 
 #endif

@@ -36,12 +36,6 @@ class CrixPlayer: public CPlayer
   bool update();
   void rewind(int subsong);
   void rewindReInit(int subsong, bool reinit); /* For seamless continous */
-  float getrefresh();
-  unsigned int getsubsongs();
-
-  const char * gettype()
-    { return "Softstar RIX OPL Music Format"; };
-
 
  protected:	
   typedef struct {
@@ -69,7 +63,6 @@ class CrixPlayer: public CPlayer
   static const uint8_t modify[28];
   static const uint8_t bd_reg_data[124];
   static uint8_t for40reg[18];
-  static const uint16_t mus_time;
   uint32_t I,T;
   uint16_t mus_block;
   uint16_t ins_block;

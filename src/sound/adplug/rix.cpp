@@ -55,7 +55,6 @@ const uint8_t CrixPlayer::bd_reg_data[] = {
   0x00,0x00,0x00};
 uint8_t CrixPlayer::for40reg[] = {0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,
 					0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F};
-const uint16_t CrixPlayer::mus_time = 0x4268;
 
 
 /*** public methods *************************************/
@@ -171,16 +170,6 @@ void CrixPlayer::rewindReInit(int subsong, bool reinit)
 		set_new_int();
 		data_initial();
 	}
-}
-
-unsigned int CrixPlayer::getsubsongs()
-{
-    return subsongs;
-}
-
-float CrixPlayer::getrefresh()
-{
-	return 70.0f;
 }
 
 /*------------------Implemention----------------------------*/
