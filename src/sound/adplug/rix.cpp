@@ -76,7 +76,7 @@ CrixPlayer::~CrixPlayer()
 }
 
 
-bool CrixPlayer::load(const char * &filename, const CFileProvider &cfp)
+bool CrixPlayer::load(const char * &filename)
 {
   fp = fopen(filename,"rb"); if(!fp) return false;
 

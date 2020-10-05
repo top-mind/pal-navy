@@ -29,7 +29,6 @@
 #include "resampler.h"
 #include "adplug/opl.h"
 #include "adplug/emuopls.h"
-#include "adplug/surroundopl.h"
 #include "adplug/convertopl.h"
 #include "adplug/rix.h"
 
@@ -411,18 +410,6 @@ RIX_Init(
 		return NULL;
 	}
 
-	if (gConfig.fUseSurroundOPL)
-	{
-		Copl* tmpopl = new CSurroundopl(gConfig.iOPLSampleRate, gConfig.iSurroundOPLOffset, opl);
-		if (NULL == tmpopl)
-		{
-			delete opl;
-			delete pRixPlayer;
-			return NULL;
-		}
-		opl = tmpopl;
-	}
-
 	pRixPlayer->opl = new CConvertopl(opl, true, gConfig.iAudioChannels == 2);
 	if (pRixPlayer->opl == NULL)
 	{
@@ -442,7 +429,7 @@ RIX_Init(
 	//
 	// Load the MKF file.
 	//
-	if (!pRixPlayer->rix->load(szFileName, CProvider_Filesystem()))
+	if (!pRixPlayer->rix->load(szFileName))
 	{
 		delete pRixPlayer->rix;
 		delete pRixPlayer->opl;
