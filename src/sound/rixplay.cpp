@@ -26,7 +26,6 @@
 #include "players.h"
 #include "audio.h"
 
-#include "resampler.h"
 #include "adplug/opl.h"
 #include "adplug/emuopls.h"
 #include "adplug/convertopl.h"
@@ -37,7 +36,6 @@ typedef struct tagRIXPLAYER :
 {
    Copl                      *opl;
    CrixPlayer                *rix;
-   void                      *resampler[2];
    BYTE                       buf[(PAL_MAX_SAMPLERATE + 69) / 70 * sizeof(short) * 2];
    LPBYTE                     pos;
    INT                        iNextMusic; // the next music number to switch to
@@ -131,8 +129,6 @@ RIX_FillBuffer(
 					pRixPlayer->iTotalFadeOutSamples = 0;
 					pRixPlayer->iRemainingFadeSamples = pRixPlayer->iTotalFadeInSamples;
 					pRixPlayer->rix->rewind(pRixPlayer->iMusic);
-					if (pRixPlayer->resampler[0]) resampler_clear(pRixPlayer->resampler[0]);
-					if (pRixPlayer->resampler[1]) resampler_clear(pRixPlayer->resampler[1]);
 					continue;
 				}
 				else
@@ -198,34 +194,7 @@ RIX_FillBuffer(
 					}
 				}
 				int sample_count = gConfig.iSampleRate / 70;
-				if (pRixPlayer->resampler[0])
-				{
-					unsigned int samples_written = 0;
-					short *finalBuf = (short*)pRixPlayer->buf;
-
-					while (sample_count)
-					{
-						int to_write = resampler_get_free_count(pRixPlayer->resampler[0]);
-						if (to_write)
-						{
-							short *tempBuf = (short*)alloca(to_write * gConfig.iAudioChannels * sizeof(short));
-							int temp_buf_read = 0;
-							pRixPlayer->opl->update(tempBuf, to_write);
-							for (int i = 0; i < to_write * gConfig.iAudioChannels; i++)
-								resampler_write_sample(pRixPlayer->resampler[i % gConfig.iAudioChannels], tempBuf[temp_buf_read++]);
-						}
-
-						int to_get = resampler_get_sample_count(pRixPlayer->resampler[0]);
-						if (to_get > sample_count) to_get = sample_count;
-						for (int i = 0; i < to_get * gConfig.iAudioChannels; i++)
-							finalBuf[samples_written++] = resampler_get_and_remove_sample(pRixPlayer->resampler[i % gConfig.iAudioChannels]);
-						sample_count -= to_get;
-					}
-				}
-				else
-				{
-					pRixPlayer->opl->update((short *)(pRixPlayer->buf), sample_count);
-				}
+        pRixPlayer->opl->update((short *)(pRixPlayer->buf), sample_count);
 			}
 
 			int l = buf_max_len - (pRixPlayer->pos - pRixPlayer->buf);
@@ -284,9 +253,6 @@ RIX_Shutdown(
 	{
 		LPRIXPLAYER pRixPlayer = (LPRIXPLAYER)object;
 		pRixPlayer->fReady = FALSE;
-		for (int i = 0; i < gConfig.iAudioChannels; i++)
-			if (pRixPlayer->resampler[i])
-				resampler_delete(pRixPlayer->resampler[i]);
 		delete pRixPlayer->rix;
 		delete pRixPlayer->opl;
 		delete pRixPlayer;
@@ -403,7 +369,7 @@ RIX_Init(
 		chip = Copl::TYPE_DUAL_OPL2;
 	}
 
-	Copl* opl = CEmuopl::CreateEmuopl((OPLCORE::TYPE)gConfig.eOPLCore, chip, gConfig.iOPLSampleRate);
+	Copl* opl = CEmuopl::CreateEmuopl((OPLCORE::TYPE)gConfig.eOPLCore, chip, gConfig.iSampleRate);
 	if (NULL == opl)
 	{
 		delete pRixPlayer;
@@ -437,17 +403,6 @@ RIX_Init(
 		pRixPlayer = NULL;
 		return NULL;
 	}
-
-	if (gConfig.iOPLSampleRate != gConfig.iSampleRate)
-	{
-		for (int i = 0; i < gConfig.iAudioChannels; i++)
-		{
-			pRixPlayer->resampler[i] = resampler_create();
-			resampler_set_quality(pRixPlayer->resampler[i], AUDIO_IsIntegerConversion(gConfig.iOPLSampleRate) ? RESAMPLER_QUALITY_MIN : gConfig.iResampleQuality);
-			resampler_set_rate(pRixPlayer->resampler[i], gConfig.iOPLSampleRate, gConfig.iSampleRate);
-		}
-	}
-
 
 	//
 	// Success.
