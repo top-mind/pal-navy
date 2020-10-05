@@ -547,7 +547,7 @@ typedef struct tagGLOBALVARS
 
 PAL_C_LINKAGE_BEGIN
 
-extern GLOBALVARS * const gpGlobals;
+extern GLOBALVARS * gpGlobals;
 
 BOOL
 PAL_IsWINVersion(

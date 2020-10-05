@@ -24,8 +24,7 @@
 #include "resampler.h"
 #include "palcfg.h"
 
-static GLOBALVARS _gGlobals;
-GLOBALVARS * const  gpGlobals = &_gGlobals;
+GLOBALVARS * gpGlobals = NULL;
 
 CONFIGURATION gConfig;
 
@@ -159,6 +158,7 @@ PAL_InitGlobals(
 
 --*/
 {
+   gpGlobals = malloc(sizeof(*gpGlobals));
    //
    // Open files
    //
@@ -246,10 +246,7 @@ PAL_FreeGlobals(
    if (!gConfig.fIsWIN95)
       PAL_FreeObjectDesc(gpGlobals->lpObjectDesc);
 
-   //
-   // Clear the instance
-   //
-   memset(gpGlobals, 0, sizeof(GLOBALVARS));
+   free(gpGlobals);
 
    PAL_FreeConfig();
 }

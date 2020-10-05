@@ -25,7 +25,7 @@
 
 #include "main.h"
 
-#define MAX_SPRITE_TO_DRAW         2048
+#define MAX_SPRITE_TO_DRAW         256
 
 typedef struct tagSPRITE_TO_DRAW
 {
