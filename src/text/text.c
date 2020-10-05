@@ -1888,6 +1888,7 @@ PAL_DetectCodePageForString(
 	int *          probability
 )
 {
+#ifdef ENABLE_GBK
 	// Try to convert the content of word.dat with different codepages,
 	// and use the codepage with minimal inconvertible characters
 	// Works fine currently for detecting Simplified Chinese & Traditional Chinese.
@@ -1944,6 +1945,10 @@ PAL_DetectCodePageForString(
 	}
 
 	return default_cp;
+#else
+  if (probability) *probability = 100;
+	return CP_BIG5;
+#endif
 }
 
 INT
@@ -2100,6 +2105,7 @@ PAL_MultiByteToWideCharCP(
 		//		}
 		//	}
 		//	break;
+#ifdef ENABLE_GBK
 		case CP_GBK:
 			invalid_char = 0x3f;
 			for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)
@@ -2125,6 +2131,7 @@ PAL_MultiByteToWideCharCP(
 				}
 			}
 			break;
+#endif
 		case CP_BIG5:
 			invalid_char = 0x3f;
 			for (i = 0; i < mbslength && wlen < wcslength && mbs[i]; i++)

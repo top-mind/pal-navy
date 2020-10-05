@@ -28,6 +28,8 @@
 # define PAL_CLASSIC        1
 #endif
 
+// #define ENABLE_GBK
+
 #include <wchar.h>
 #include <stdio.h>
 #include <stdlib.h>
