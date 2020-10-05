@@ -159,6 +159,8 @@ PAL_InitGlobals(
 --*/
 {
    gpGlobals = malloc(sizeof(*gpGlobals));
+   memset(gpGlobals, 0, sizeof(*gpGlobals));
+
    //
    // Open files
    //
