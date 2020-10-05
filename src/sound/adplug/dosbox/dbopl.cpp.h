@@ -1254,57 +1254,7 @@ void Chip::Setup( Bit32u rate ) {
 		assert(lshift > first_shift);
 		linearRates[i] = (Bit32u)( (OPLRATE << first_shift ) / rate * (EnvelopeIncreaseTable[ index ] << (lshift - first_shift)));
 	}
-//	Bit32s attackDiffs[62];
-	//Generate the best matching attack rate
-	for ( Bit8u i = 0; i < 62; i++ ) {
-		Bit8u index, shift;
-		EnvelopeSelect( i, index, shift );
-		//Original amount of samples the attack would take
-		Bit32s original = (Bit32u)( (uint64_t)(AttackSamplesTable[ index ] << shift) * rate / OPLRATE);
-		 
-		int lshift = RATE_SH - shift - 3;
-		int first_shift = 8;
-		assert(lshift > first_shift);
-		Bit32s guessAdd = (Bit32u)( (OPLRATE << first_shift ) / rate * (EnvelopeIncreaseTable[ index ] << ( lshift - first_shift)));
-		Bit32s bestAdd = guessAdd;
-		Bit32u bestDiff = 1 << 30;
-		for( Bit32u passes = 0; passes < 16; passes ++ ) {
-			Bit32s volume = ENV_MAX;
-			Bit32s samples = 0;
-			Bit32u count = 0;
-			while ( volume > 0 && samples < original * 2 ) {
-				count += guessAdd;
-				Bit32s change = count >> RATE_SH;
-				count &= RATE_MASK;
-				if ( GCC_UNLIKELY(change) ) { // less than 1 % 
-					volume += ( ~volume * change ) >> 3;
-				}
-				samples++;
-
-			}
-			Bit32s diff = original - samples;
-			Bit32u lDiff = labs( diff );
-			//Init last on first pass
-			if ( lDiff < bestDiff ) {
-				bestDiff = lDiff;
-				bestAdd = guessAdd;
-				//We hit an exactly matching sample count
-				if ( !bestDiff )
-					break;
-			}
-			//Linear correction factor, not exactly perfect but seems to work
-			guessAdd = (Bit32u)(guessAdd * (original - diff) / original);
-			//Below our target
-			if ( diff < 0 ) {
-				//Always add one here for rounding, an overshoot will get corrected by another pass decreasing
-				guessAdd++;
-			}
-		}
-		attackRates[i] = bestAdd;
-		//Keep track of the diffs for some debugging
-//		attackDiffs[i] = bestDiff;
-	}
-	for ( Bit8u i = 62; i < 76; i++ ) {
+	for ( Bit8u i = 0; i < 76; i++ ) {
 		//This should provide instant volume maximizing
 		attackRates[i] = 8 << RATE_SH;
 	}
