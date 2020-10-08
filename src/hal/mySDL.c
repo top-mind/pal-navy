@@ -20,7 +20,7 @@ void IncreaseDraw() {
 
 #ifdef __NAVY__
 
-#include <sdl.h>
+#include <SDL.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,19 +55,7 @@ void SDL_SetPalette(SDL_Surface *s, int flags, SDL_Color *colors, int firstcolor
   }
 }
 
-int SDL_Init(uint32_t flags) {
-  NDL_OpenDisplay(W, H);
-  return 0;
-}
-
-void SDL_Quit(void) {
-}
-
 void SDL_PauseAudio(int pause_on) {
-}
-
-char *SDL_GetError(void) {
-  return "Navy does not support SDL_GetError()";
 }
 
 void SDL_LockAudio(void) {
@@ -78,9 +66,6 @@ void SDL_UnlockAudio(void) {
 
 int SDL_ShowCursor(int toggle) {
   return 0;
-}
-
-void SDL_CloseAudio(void) {
 }
 
 void SDL_WM_SetCaption(const char *title, const char *icon) {
