@@ -75,12 +75,8 @@ VIDEO_Startup(
       //
       // Fall back to 640x480 software mode.
       //
-#ifdef __NAVY__
-      gpScreenReal = SDL_SetVideoMode(640, 480, 8, SDL_SWSURFACE);
-#else
       gpScreenReal = SDL_SetVideoMode(640, 480, 8,
          SDL_SWSURFACE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0));
-#endif
    }
 
    //
