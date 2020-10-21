@@ -100,19 +100,18 @@ typedef const WCHAR        *LPCWSTR;
 #define SDL_strcasecmp strcasecmp
 #define SDL_setenv(a,b,c) 
 
+#define PAL_SDL_INIT_FLAGS    (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
+#define PAL_VIDEO_INIT_FLAGS  (SDL_HWSURFACE | SDL_RESIZABLE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0))
+
 #ifdef __NAVY__
 #define SDL_SwapLE32(x) (x)
 #define SDL_SwapLE16(x) (x)
 #define SDL_MUSTLOCK(screen) 0
 
-#define PAL_VIDEO_INIT_FLAGS  (SDL_HWSURFACE)
 #define PAL_FATAL_OUTPUT(s)   printf("FATAL ERROR: %s\n", (s))
-#define PAL_SDL_INIT_FLAGS    0
 #define PAL_PREFIX            "/share/games/pal/"
 #else
-#define PAL_VIDEO_INIT_FLAGS  (SDL_HWSURFACE | SDL_RESIZABLE | (gConfig.fFullScreen ? SDL_FULLSCREEN : 0))
 #define PAL_FATAL_OUTPUT(s)   system(PAL_va(0, "beep; xmessage -center \"FATAL ERROR: %s\"", (s)))
-#define PAL_SDL_INIT_FLAGS    (SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_NOPARACHUTE | SDL_INIT_JOYSTICK)
 #define PAL_PREFIX            "./data"
 #endif
 
